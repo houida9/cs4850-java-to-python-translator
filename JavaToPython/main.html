@@ -5,8 +5,22 @@
     <title>JavaToPython</title>
     <link rel="stylesheet" href="main.css">
     <script src="main.js"></script>
-    <script>function downloadFile(filename, text){
+    <script>function downloadPythonFile(filename){
         var element = document.createElement('a');
+        let text = document.getElementById('pythonTextArea').value;
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+    }
+    function downloadJavaFile(filename){
+        var element = document.createElement('a');
+        let text = document.getElementById('javaTextArea').value;
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
         element.setAttribute('download', filename);
 
@@ -44,17 +58,22 @@
     <div class="secondRow">
         <div class="firstColumn">
             <input type="file" name="inputfile" id="inputfile">
+            <button type="button" style="width : 120px;"
+                    onclick="downloadJavaFile('original.java')">
+                Download File</button>
         </div>
 
         <div class="thirdColumn">
-            <button type="button" style="width : 120px; margin-left: 350px" onclick="downloadFile('translated.py','This is going to be the python file data')">
+            <button type="button" style="width : 120px; margin-left: 350px"
+                    onclick="downloadPythonFile('translated.py')">
                 Download File</button>
 
         </div>
     </div>
     <div class="thirdRow">
         <div class="firstColumn">
-        <textarea id="javaTextArea" name="javaTextArea" rows="25" cols="50" style="border:solid 1px orange;">
+        <textarea id="javaTextArea" name="javaTextArea"
+                  rows="25" cols="50" style="border:solid 1px orange;">
 
         </textarea>
         </div>
@@ -62,12 +81,12 @@
                 <button type="button" style="text-align: center; margin-top: 100%">Translate!</button>
         </div>
         <div class="thirdColumn">
-        <textarea id="pythonTextArea" name="pythonTextArea" rows="25" cols="50" style="border:solid 1px orange;">
+        <textarea id="pythonTextArea" name="pythonTextArea"
+                  rows="25" cols="50" style="border:solid 1px orange;">
         </textarea>
         </div>
     </div>
 </div>
-
 
 
 <script type="text/javascript">
