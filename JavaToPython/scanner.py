@@ -90,22 +90,63 @@ TT_RARRAY = 'RARRAY'
 TT_COMMA = 'COMMA'
 
 KEYWORDS = [
-	'int',
-    'while',
-    'if',
     'double',
-    'float',
     'String',
-    'void',
-    'final',
     'System.out.print',
     'System.out.println',
-    'public',
-    'static',
     'args',
+    'main',
+
+    'abstract',
+    'continue',
+    'for',
+    'new',
+    'switch',
+    'assert',
+    'default',
+    'goto',
+    'package',
+    'synchronized',
+    'boolean',
+    'do',
+    'if',
+    'private',
+    'this',
+    'break',
+    'double',
+    'implements',
+    'protected',
+    'throw',
+    'byte',
+    'else',
+    'import',
     'public',
+    'throws',
+    'case',
+    'enum',
+    'instanceof',
+    'return',
+    'transient',
+    'catch',
+    'extends',
+    'int',
+    'short',
+    'try',
+    'char',
+    'final',
+    'interface',
+    'static',
+    'void',
     'class',
-    'main'
+    'finally',
+    'long',
+    'strictfp',
+    'volatile',
+    'const',
+    'float',
+    'native',
+    'super',
+    'while'
 ]
 
 class Token:
@@ -126,7 +167,7 @@ class Token:
 
     def __repr__(self):
         if self.value: return f'{self.type}:{self.value}\n'
-        return f'{self.type}'
+        return f'{self.type}\n'
 
 #######################################
 # LEXER
@@ -150,8 +191,10 @@ class Lexer:
         while self.current_char != None:
             if self.current_char in ' \t':
                 self.advance()
-            elif self.current_char in ';\n':
+            elif self.current_char == ';':
                 tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
+                self.advance()
+            elif self.current_char == '\n':
                 self.advance()
             elif self.current_char == '"':
                 tokens.append(self.make_print_statement())
