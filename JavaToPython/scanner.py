@@ -83,14 +83,24 @@ TT_EOF				= 'EOF'
 TT_NEWLINE = 'NEWLINE'
 TT_OPENBRACKET = 'OPENBRACKET'
 TT_CLOSEBRACKET = 'CLOSEBRACKET'
+TT_QUOTE = 'QUOTE'
+TT_LARRAY = 'LARRAY'
+TT_RARRAY = 'RARRAY'
 
 KEYWORDS = [
 	'int',
     'while',
-	'AND', #
-	'OR', #
-	'NOT', #
-    'END'
+    'if',
+    'double',
+    'float',
+    'String',
+    'void',
+    'final',
+    'System.out.print',
+    'System.out.println',
+    'public',
+    'static',
+    'args'
 ]
 
 class Token:
@@ -138,6 +148,9 @@ class Lexer:
             elif self.current_char in ';\n':
                 tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
                 self.advance()
+            elif self.current_char == '"':
+                tokens.append(self.make_print_statement())
+                self.advance()
             elif self.current_char in DIGITS:
                 tokens.append(self.make_number())
             elif self.current_char in LETTERS:
@@ -179,6 +192,12 @@ class Lexer:
             elif self.current_char == '}':
                 tokens.append(Token(TT_CLOSEBRACKET, pos_start=self.pos))
                 self.advance()
+            elif self.current_char == '[':
+                tokens.append(Token(TT_LARRAY, pos_start=self.pos))
+                self.advance()
+            elif self.current_char == ']':
+                tokens.append(Token(TT_RARRAY, pos_start=self.pos))
+                self.advance()
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char
@@ -209,7 +228,7 @@ class Lexer:
         id_str = ''
         pos_start = self.pos.copy()
 
-        while self.current_char != None and self.current_char in LETTERS_DIGITS + '_':
+        while self.current_char != None and self.current_char in LETTERS_DIGITS + '.' + '_':
             id_str += self.current_char
             self.advance()
 
@@ -259,6 +278,22 @@ class Lexer:
             tok_type = TT_GTE
 
         return Token(tok_type, pos_start=pos_start, pos_end=self.pos)
+
+    def make_print_statement(self):
+        id_str = ''
+        pos_start = self.pos.copy()
+        quoteCount = 0
+
+        while self.current_char != None and self.current_char in LETTERS_DIGITS + '.' + '_' + ' ' + '"':
+            id_str += self.current_char
+            if self.current_char == '"':
+                quoteCount += 1
+                if quoteCount == 2:
+                    break
+            self.advance()
+
+        tok_type = TT_KEYWORD if id_str in KEYWORDS else TT_IDENTIFIER
+        return Token(tok_type, id_str, pos_start, self.pos)
 
 
 #######################################

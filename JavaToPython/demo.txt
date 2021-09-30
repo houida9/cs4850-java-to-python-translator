@@ -1,4 +1,2 @@
-int x = 2;
-int Z = 3;
-while (x);
-while (x > 3){}
+System.out.println("hello this is my string");
+System.out.print("This is the second test");
