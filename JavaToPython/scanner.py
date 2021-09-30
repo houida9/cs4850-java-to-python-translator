@@ -6,6 +6,7 @@ import string
 DIGITS = '0123456789'
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
+WEIRD_LETTERS = LETTERS + DIGITS + '.' + '_' + ' ' + '"' + ":" + ";"
 
 
 #######################################
@@ -86,6 +87,7 @@ TT_CLOSEBRACKET = 'CLOSEBRACKET'
 TT_QUOTE = 'QUOTE'
 TT_LARRAY = 'LARRAY'
 TT_RARRAY = 'RARRAY'
+TT_COMMA = 'COMMA'
 
 KEYWORDS = [
 	'int',
@@ -100,7 +102,10 @@ KEYWORDS = [
     'System.out.println',
     'public',
     'static',
-    'args'
+    'args',
+    'public',
+    'class',
+    'main'
 ]
 
 class Token:
@@ -150,6 +155,9 @@ class Lexer:
                 self.advance()
             elif self.current_char == '"':
                 tokens.append(self.make_print_statement())
+                self.advance()
+            elif self.current_char == ',':
+                tokens.append(Token(TT_COMMA, pos_start=self.pos))
                 self.advance()
             elif self.current_char in DIGITS:
                 tokens.append(self.make_number())
@@ -284,7 +292,7 @@ class Lexer:
         pos_start = self.pos.copy()
         quoteCount = 0
 
-        while self.current_char != None and self.current_char in LETTERS_DIGITS + '.' + '_' + ' ' + '"':
+        while self.current_char != None and self.current_char in WEIRD_LETTERS:
             id_str += self.current_char
             if self.current_char == '"':
                 quoteCount += 1
