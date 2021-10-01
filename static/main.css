@@ -1,0 +1,41 @@
+.parentDiv{
+    margin-left: 10%;
+    margin-right: 10%;
+}
+.firstColumn {
+    float: left;
+    width: 400px;
+    text-align:center;
+
+}
+.secondColumn {
+    float: left;
+    width: 200px;
+    text-align:center;
+
+
+}
+.thirdColumn {
+    float: left;
+    width: 400px;
+    text-align:center;
+
+}
+.parentDiv{
+    border: black;
+}
+.firstRow{
+    height: 10px;
+    text-align: center;
+}
+.secondRow{
+    height: 20px;
+    text-align: center;
+
+}
+.secondRow{
+    height: 200px;
+    text-align: center;
+
+}
+/* Clear floats after the columns */
