@@ -1,3 +1,4 @@
+// Disable download buttons when the text area is empty
 setInterval(function() { 
   if(document.getElementById('javaTextArea').value.trim().length > 0) { 
       document.getElementById('javadownload').disabled = false; 
@@ -12,6 +13,7 @@ setInterval(function() {
   }
 }, 1000);
 
+// Click listener for the Python download button
 function downloadPythonFile(filename){
     var element = document.createElement('a');
     let text = document.getElementById('pythonTextArea').value;
@@ -26,6 +28,7 @@ function downloadPythonFile(filename){
     document.body.removeChild(element);
 }
 
+// Click listener for the Java download button
 function downloadJavaFile(filename){
     var element = document.createElement('a');
     let text = document.getElementById('javaTextArea').value;
@@ -40,6 +43,7 @@ function downloadJavaFile(filename){
     document.body.removeChild(element);
 }
 
+// Copy uploaded file to the Java text area
 document.getElementById('inputfile')
 .addEventListener('change', function() {
     var fr=new FileReader();
@@ -52,3 +56,18 @@ document.getElementById('inputfile')
     fr.readAsText(this.files[0]);
     document.getElementById('inputfile').value='';
 })
+
+// Activate TAB spaces in Java text area
+document.getElementById('javaTextArea').addEventListener('keydown', function(e) {
+    if (e.key == 'Tab') {
+      e.preventDefault();
+      var start = this.selectionStart;
+      var end = this.selectionEnd;
+
+      this.value = this.value.substring(0, start) +
+        "\t" + this.value.substring(end);
+
+      this.selectionStart =
+        this.selectionEnd = start + 1;
+    }
+});
