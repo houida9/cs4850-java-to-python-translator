@@ -1,4 +1,5 @@
 import scanner
+import parser
 from os import listdir
 from os.path import isfile, join, splitext
 
@@ -9,6 +10,7 @@ from os.path import isfile, join, splitext
 input_dir = "test_programs"
 output_dir = "output"
 
+
 java_programs = [file for file in listdir(input_dir) if isfile(join(input_dir, file)) and splitext(file)[1] in [".java", ".txt"]]
 
 for input_file in java_programs:  
@@ -18,7 +20,7 @@ for input_file in java_programs:
   print(f"\nScanning {input_path}")
 
   text = open(input_path, "r+")
-  result, error = scanner.run(input_path, text.read())
+  result, error = parser.run(input_path, text.read())
 
   if error: 
     print(error.as_string())
