@@ -54,7 +54,7 @@ document.getElementById('inputfile')
     }
 
     fr.readAsText(this.files[0]);
-    document.getElementById('inputfile').value='';
+    document.getElementById('inputfile').value=fr.filename;
 })
 
 // Activate TAB spaces in Java text area
