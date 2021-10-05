@@ -1,41 +1,78 @@
-.parentDiv{
-    margin-left: 10%;
-    margin-right: 10%;
+body {
+    background-color: #aaabb890;
 }
-.firstColumn {
-    float: left;
-    width: 400px;
-    text-align:center;
 
+input {
+    margin-top: 10px;
+    width: 280px !important;
 }
-.secondColumn {
-    float: left;
-    width: 200px;
-    text-align:center;
 
+textarea {
+    max-width: 100%;
+    border-radius: 6px;
+    margin-top: 30px;
+    padding: 20px;
+}
 
+.row>div>img, .row>div>i {
+    width: 120px;
+    height: 160px;
+    margin: 20px;
 }
-.thirdColumn {
-    float: left;
-    width: 400px;
-    text-align:center;
 
+#pythondownload, #javadownload {
+    width: 100px;
+    height: 40px;
+    color: white;
+    float: right;
 }
-.parentDiv{
-    border: black;
-}
-.firstRow{
-    height: 10px;
-    text-align: center;
-}
-.secondRow{
-    height: 20px;
-    text-align: center;
 
+#pythondownload {
+    margin-top: 60px
 }
-.secondRow{
-    height: 200px;
-    text-align: center;
 
+#javadownload {
+    margin-top: 10px;
 }
-/* Clear floats after the columns */
+
+i {
+    margin-top: 70px !important;
+}
+
+.row {
+    margin-top: 50px !important;
+}
+
+textarea {
+    border-radius: 7px; 
+    box-shadow: 6px 6px 6px 6px #888888; 
+    border:solid 1px black;
+}
+
+button {
+    color: white !important;
+    letter-spacing: 2px;
+    font-weight: 300;
+    width: auto !important;
+}
+
+.fw-light, .lead {
+    letter-spacing: 2px;
+}
+
+input[type="file"] { 
+    border: 1px solid #b6b7c7e9;
+}
+
+#translate {
+    position: absolute;top: 50%; left:50%;
+    transform: translate(-50%, 50%);
+    font-weight: 300px !important;
+    letter-spacing: 2px;
+}
+
+#javaTextArea:focus, #pythonTextArea:focus {
+    outline: none !important;
+    border: 1px solid rgb(6, 97, 128);
+    box-shadow: 0 0 10px #1763b4;
+}

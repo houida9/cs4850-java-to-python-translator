@@ -1,107 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>JavaToPython</title>
-    <link rel="stylesheet" href="main.css">
+  <head>
+      <meta charset="UTF-8">
+      <title>JavaToPython</title>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+      <link href="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.min.js" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+      <link rel="stylesheet" href="main.css">
+  </head>
+
+  <body>
+    <header id="header" class="masthead">
+      <div class="container h-100">
+        <div class="row h-100 align-items-center">
+          <div class="col-12 text-center">
+            <h1 class="fw-light">Java to Python Transpiler</h1>
+            <p class="lead">Senior Project 1A | Fall 2021</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+
+    <!-- Java and Python Images -->
+    <div class="container">
+        <div class="row align-items-center" style="background-color: #aaabb8d0; box-shadow: 10px 10px 10px 10px #888888;border-radius: 10px;">
+          <div class="col-lg-4 d-flex justify-content-center text-center">
+            <img class="img-fluid" style="height: 180px; width: 130px" src="../assets/java.png" alt="Java image">
+          </div>
+          <div class="col-lg-4 d-flex justify-content-center text-center">
+            <i class="img-fluid fas fa-arrow-circle-right" style="font-size: 6em"></i>
+          </div>
+          <div class="col-lg-4 d-flex justify-content-center text-center">
+            <img class="img-fluid" style="height: 140px; width: 170px;" src="../assets/python.png" alt="python image">
+          </div>
+        </div>
+
+
+        <!-- JAVA -->
+        <div class="row">
+            <div class="col-lg-5">
+              <div class="custom-file">
+                <input type="file" class="custom-file-input form-control" id="inputfile"/>
+                <button class="btn btn-success" type="button" id="javadownload"
+                onclick="downloadJavaFile('original.java')"  disabled>
+                  Download</button>
+              </div>      
+              <textarea id="javaTextArea" name="javaTextArea" withspellcheck="false" rows="25" cols="80"></textarea>
+            </div>
+
+
+            <!-- TRANSLATE button -->
+            <div class="col-lg-2" style="position: relative;">
+              <button id="translate" class="btn btn-info btn-lg" type="button">Translate</button>
+            </div>
+
+
+            <!-- PYTHON -->
+            <div class="col-lg-5">
+                <button class="btn btn-warning sm" type="button" id="pythondownload"
+                          onclick="downloadPythonFile('translated.py')" disabled>
+                      Download
+                </button>
+              <textarea readonly id="pythonTextArea" name="pythonTextArea" withspellcheck="false" rows="25" cols="80">
+              </textarea>
+            </div>
+        </div>
+    </div>
     <script src="main.js"></script>
-    <script>function downloadPythonFile(filename){
-        var element = document.createElement('a');
-        let text = document.getElementById('pythonTextArea').value;
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        element.setAttribute('download', filename);
-
-        element.style.display = 'none';
-        document.body.appendChild(element);
-
-        element.click();
-
-        document.body.removeChild(element);
-    }
-    function downloadJavaFile(filename){
-        var element = document.createElement('a');
-        let text = document.getElementById('javaTextArea').value;
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        element.setAttribute('download', filename);
-
-        element.style.display = 'none';
-        document.body.appendChild(element);
-
-        element.click();
-
-        document.body.removeChild(element);
-    }
-
-    const fileSelector = document.getElementById('file-selector');
-        if(fileSelector) {
-            fileSelector.addEventListener('change', (event) => {
-                const fileList = event.target.files;
-                console.log(fileList);
-            });
-        }
-    </script>
-</head>
-<body>
-<h1>JavaToPython</h1>
-<div class="parentDiv" >
-    <div class="firstRow">
-        <div class="firstColumn">
-            <img style="height: 100px; width: 150px" src="images/javaImage.png" alt="Java image">
-        </div>
-        <div class="secondColumn">
-            <img style="height: 100px; width: 100px" src="images/rightArrow.png" alt="Right Arrow image">
-        </div>
-        <div class="thirdColumn">
-            <img style="height: 110px; width: 170px" src="images/pythonImage.png" alt="python image">
-        </div>
-    </div>
-    <div class="secondRow">
-        <div class="firstColumn">
-            <input type="file" name="inputfile" id="inputfile">
-            <button type="button" style="width : 120px;"
-                    onclick="downloadJavaFile('original.java')">
-                Download File</button>
-        </div>
-
-        <div class="thirdColumn">
-            <button type="button" style="width : 120px; margin-left: 350px"
-                    onclick="downloadPythonFile('translated.py')">
-                Download File</button>
-
-        </div>
-    </div>
-    <div class="thirdRow">
-        <div class="firstColumn">
-        <textarea id="javaTextArea" name="javaTextArea"
-                  rows="25" cols="50" style="border:solid 1px orange;">
-
-        </textarea>
-        </div>
-        <div class="secondColumn">
-                <button type="button" style="text-align: center; margin-top: 100%">Translate!</button>
-        </div>
-        <div class="thirdColumn">
-        <textarea id="pythonTextArea" name="pythonTextArea"
-                  rows="25" cols="50" style="border:solid 1px orange;">
-        </textarea>
-        </div>
-    </div>
-</div>
-
-
-<script type="text/javascript">
-    document.getElementById('inputfile')
-        .addEventListener('change', function() {
-
-            var fr=new FileReader();
-            fr.onload=function(){
-                document.getElementById('javaTextArea')
-                    .textContent=fr.result;
-            }
-
-            fr.readAsText(this.files[0]);
-        })
-</script>
-
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+  </body>
 </html>
