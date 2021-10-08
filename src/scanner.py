@@ -95,11 +95,11 @@ TT_COMMA        = 'COMMA'
 
 KEYWORDS = [
     'double',
-    'String',
+    #'String',
     'System.out.print',
     'System.out.println',
     'args',
-    'main',
+    #'main',
 
     'abstract',
     'continue',
