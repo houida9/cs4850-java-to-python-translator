@@ -45,17 +45,17 @@ function downloadJavaFile(filename){
 
 // Copy uploaded file to the Java text area
 document.getElementById('inputfile')
-.addEventListener('change', function() {
-    var fr=new FileReader();
-    fr.onload=function(){
+  .addEventListener('change', function() {
+      var fr = new FileReader();
+      fr.onload = function(){
 
-        document.getElementById('javaTextArea')
-            .value=fr.result;
-    }
+          document.getElementById('javaTextArea')
+              .value = fr.result;
+      }
 
-    fr.readAsText(this.files[0]);
-    document.getElementById('inputfile').value=fr.filename;
-})
+      fr.readAsText(this.files[0]);
+      document.getElementById('inputfile').value = ''; // change to '' if u want reload behavior
+  })
 
 // Activate TAB spaces in Java text area
 document.getElementById('javaTextArea').addEventListener('keydown', function(e) {
