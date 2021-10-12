@@ -6,13 +6,12 @@ import string
 DIGITS = '0123456789'
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
-WEIRD_LETTERS = LETTERS + DIGITS + '.' + '_' + ' ' + '"' + ":" + ";"
+WEIRD_LETTERS = LETTERS + DIGITS + '.' + '_' + ' ' + '"' + ":" + ";" + ','
 
 
 #######################################
 # ERRORS
 #######################################
-
 class Error:
     def __init__(self, pos_start, pos_end, error_name, details):
         self.pos_start = pos_start
@@ -67,6 +66,7 @@ class Position:
 #######################################
 
 TT_INT			= 'INT'
+TT_STRING       = 'STRING'
 TT_FLOAT    	= 'FLOAT'
 TT_IDENTIFIER	= 'IDENTIFIER'
 TT_KEYWORD		= 'KEYWORD'
@@ -92,6 +92,7 @@ TT_QUOTE        = 'QUOTE'
 TT_LARRAY       = 'LARRAY'
 TT_RARRAY       = 'RARRAY'
 TT_COMMA        = 'COMMA'
+TT_PLUSPLUS     = 'PLUSPLUS'
 
 KEYWORDS = [
     'double',
@@ -100,7 +101,6 @@ KEYWORDS = [
     'System.out.println',
     'args',
     'main',
-
     'abstract',
     'continue',
     'for',
@@ -184,10 +184,16 @@ class Lexer:
         self.pos = Position(-1, 0, -1, fn, text)
         self.current_char = None
         self.advance()
+        self.current_char_copy = None
 
     def advance(self):
         self.pos.advance(self.current_char)
         self.current_char = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
+
+    def peek(self):
+        self.current_char_copy = self.current_char
+        self.pos.advance(self.current_char_copy)
+        self.current_char_copy = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
 
     def make_tokens(self):
         tokens = []
@@ -198,7 +204,10 @@ class Lexer:
             elif self.current_char == ';':
                 tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
                 self.advance()
+                if self.current_char == '\n':
+                    self.advance()
             elif self.current_char == '\n':
+                tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '"':
                 tokens.append(self.make_print_statement())
@@ -211,7 +220,10 @@ class Lexer:
             elif self.current_char in LETTERS:
                 tokens.append(self.make_identifier())
             elif self.current_char == '+':
-                tokens.append(Token(TT_PLUS, pos_start=self.pos))
+                self.peek()
+                if self.current_char_copy == '+':
+                    tokens.append(Token(TT_PLUSPLUS, pos_start=self.pos))
+                else: tokens.append(Token(TT_PLUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '-':
                 tokens.append(Token(TT_MINUS, pos_start=self.pos))
@@ -347,8 +359,225 @@ class Lexer:
                     break
             self.advance()
 
-        tok_type = TT_KEYWORD if id_str in KEYWORDS else TT_IDENTIFIER
+        tok_type = TT_STRING
         return Token(tok_type, id_str, pos_start, self.pos)
+
+#######################################
+# Translator & Deleted keywords
+#######################################
+DELETE = [
+    'double',
+    'String',
+    'args',
+    'main',
+    'continue',
+    'new',
+    'switch',
+    'assert',
+    'default',
+    'goto',
+    'package',
+    'synchronized',
+    'boolean',
+    'this',
+    'break',
+    'double',
+    'implements',
+    'protected',
+    'throw',
+    'byte',
+    'public',
+    'throws',
+    'case',
+    'enum',
+    'instanceof',
+    'transient',
+    'extends',
+    'int',
+    'short',
+    'char',
+    'final',
+    'interface',
+    'static',
+    'void',
+    'finally',
+    'long',
+    'strictfp',
+    'volatile',
+    'const',
+    'float',
+    'native',
+    'super',
+]
+class Translator:
+    def __init__(self, tokens):
+        self.tokens = tokens
+        self.tok_idx = -1
+        self.advance()
+        self.translatedToken = []
+
+    def advance(self):
+        self.tok_idx += 1
+        if self.tok_idx < len(self.tokens):
+            self.current_tok = self.tokens[self.tok_idx]
+        return self.current_tok
+
+    def peek(self, peek_idx):
+        self.tok_idx_copy = self.tok_idx
+        self.tok_idx_copy += peek_idx
+        if self.tok_idx_copy < len(self.tokens):
+            self.current_tok_copy = self.tokens[self.tok_idx_copy]
+        return self.current_tok_copy
+
+    def __repr__(self):
+        return f'{self.current_tok}\n'
+
+    def translate(self):
+            while self.current_tok != None:
+                if self.current_tok.type == TT_PLUS:
+                    self.translatedToken.append('+')
+                    self.advance()
+                elif self.current_tok.type == TT_MINUS:
+                    self.translatedToken.append('-')
+                    self.advance()
+                elif self.current_tok.type == TT_IDENTIFIER:
+                    self.translatedToken.append(self.current_tok.value)
+                    self.advance()
+                elif self.current_tok.type == TT_EQ:
+                    self.translatedToken.append('=')
+                    self.advance()
+                elif self.current_tok.type == TT_INT:
+                    self.translatedToken.append(self.current_tok.value)
+                    self.advance()
+                elif self.current_tok.type == TT_FLOAT:
+                    self.translatedToken.append(self.current_tok.value)
+                    self.advance()
+                elif self.current_tok.type == TT_NEWLINE:
+                    self.translatedToken.append('\n')
+                    self.advance()
+                elif self.current_tok.value == 'System.out.print' or self.current_tok.value == 'System.out.println':
+                    self.translatedToken.append('print')
+                    self.advance()
+                elif self.current_tok.value in DELETE:
+                    self.translatedToken.append('')
+                    self.advance()
+                elif self.current_tok.value == 'for':
+                    self.translatedToken.append(self.translate_for_loop())
+                    self.advance()
+                elif self.current_tok.value in KEYWORDS:
+                    self.translatedToken.append(self.current_tok.value)
+                    self.advance()
+                elif self.current_tok.type == TT_OPENBRACKET:
+                    self.translatedToken.append(':\n\t')
+                    self.advance()
+                elif self.current_tok.type == TT_CLOSEBRACKET:
+                    self.translatedToken.append('\n')
+                    self.advance()
+                elif self.current_tok.type == TT_LPAREN:
+                    self.translatedToken.append('(')
+                    self.advance()
+                elif self.current_tok.type == TT_RPAREN:
+                    self.translatedToken.append(')')
+                    self.advance()
+                elif self.current_tok.type == TT_RARRAY:
+                    self.translatedToken.append(']')
+                    self.advance()
+                elif self.current_tok.type == TT_LARRAY:
+                    self.translatedToken.append('[')
+                    self.advance()
+                elif self.current_tok.type == TT_COMMA:
+                    self.translatedToken.append(',')
+                    self.advance()
+                elif self.current_tok.type == TT_STRING:
+                    self.translatedToken.append(self.current_tok.value)
+                    self.advance()
+                elif self.current_tok.type == TT_MUL:
+                    self.translatedToken.append('*')
+                    self.advance()
+                elif self.current_tok.type == TT_DIV:
+                    self.translatedToken.append('/')
+                    self.advance()
+                elif self.current_tok.type == TT_LT:
+                    self.translatedToken.append('<')
+                    self.advance()
+                elif self.current_tok.type == TT_GT:
+                    self.translatedToken.append('>')
+                    self.advance()
+                elif self.current_tok.type == TT_PLUSPLUS:
+                    self.translatedToken.append('++')
+                    self.advance()
+                else:
+                    self.translatedToken.append('EOF')
+                    return self.translatedToken
+
+# #######################################
+# # Translate Keywords
+# #######################################
+# class Translate_Keywords:
+#     def __init__(self, tokens):
+#         self.tokens = tokens
+#         self.tok_idx = -1
+#         self.advance()
+#         self.translatedToken = []
+#
+#     def advance(self):
+#         self.tok_idx += 1
+#         if self.tok_idx < len(self.tokens):
+#             self.current_tok = self.tokens[self.tok_idx]
+#         return self.current_tok
+#
+#     def peek(self, peek_idx):
+#         self.tok_idx_copy = self.tok_idx
+#         self.tok_idx_copy += peek_idx
+#         if self.tok_idx_copy < len(self.tokens):
+#             self.current_tok_copy = self.tokens[self.tok_idx_copy]
+#         return self.current_tok_copy
+#
+#     def __repr__(self):
+#         return f'{self.current_tok}\n'
+#
+#     def translate_keywords(self):
+#             while self.current_tok != None:
+#                 if self.current_tok.value == 'for':
+#                     self.translatedToken.append(self.translate_for_loop())
+#                     self.advance()
+#                 else:
+#                     self.translatedToken.append(self.current_tok.value)
+#             return self.translatedToken
+#
+#     def translate_for_loop(self):
+#         self.translatedToken.append('for')
+#         identifier = ''
+#         range = ''
+#         increment = ''
+#         while self.current_tok_copy.type != TT_OPENBRACKET:
+#             if self.current_tok_copy.type == TT_LPAREN:
+#                 self.append
+#
+#
+#
+# #######################################
+# # Write to Python file
+# #######################################
+# class write_tranlsated_tokens:
+#     def __init__(self, tokens):
+#         self.tokens = tokens
+#         self.tok_idx = -1
+#         self.advance()
+#
+#     def advance(self):
+#         self.tok_idx += 1
+#         if self.tok_idx < len(self.tokens):
+#             self.current_tok = self.tokens[self.tok_idx]
+#         return self.current_tok
+#
+#     def peek(self):
+#         self.tok_idx_copy = self.tok_idx
+#         self.tok_idx_copy += 1
+#         self.current_tok_copy = self.current_tok
+#         if self.tok_idx_copy < len(self.tokens):
+#             self.current_tok_copy = self.tokens[self.tok_idx_copy]
+#         return  self.current_tok_copy
 
 
 #######################################
@@ -356,7 +585,16 @@ class Lexer:
 #######################################
 
 def run(fn, text):
+    #Generate tokens
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
+    if error: return None, error
 
-    return tokens, error
+    #Generate AST
+    # parser = Parser(tokens)
+    # ast = parser.parse()
+
+    #Translate
+    translator = Translator(tokens)
+    result = translator.translate()
+    return result, None
