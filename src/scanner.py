@@ -37,30 +37,26 @@ class InvalidSyntaxError(Error):
         super().__init__(pos_start, pos_end, "Invalid Syntax", details)
 
 #######################################
-# POSITION
-#######################################
+# POSITION###########
 
 class Position:
-	def __init__(self, idx, ln, col, fn, ftxt):
-		self.idx = idx
-		self.ln = ln
-		self.col = col
-		self.fn = fn
-		self.ftxt = ftxt
+    def __init__(self, idx, ln, col, fn, ftxt):
+        self.idx = idx
+        self.ln = ln
+        self.col = col
+        self.fn = fn
+        self.ftxt = ftxt
 
-	def advance(self, current_char=None):
-		self.idx += 1
-		self.col += 1
+    def advance(self, current_char=None):
+        self.idx +=1
+        self.col += 1
+        if current_char =='\n':
+            self.ln += 1
+            self.col = 0
+        return self
 
-		if current_char == '\n':
-			self.ln += 1
-			self.col = 0
-
-		return self
-
-	def copy(self):
-		return Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
-
+    def copy(self):
+        return  Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
 #######################################
 # TOKENS
 #######################################
@@ -92,7 +88,10 @@ TT_QUOTE        = 'QUOTE'
 TT_LARRAY       = 'LARRAY'
 TT_RARRAY       = 'RARRAY'
 TT_COMMA        = 'COMMA'
-TT_PLUSPLUS     = 'PLUSPLUS'
+TT_PLUSPLUS     = '++'
+TT_MINUSMINUS     = '--'
+TT_PRINT        = 'PRINT'
+TT_TAB          = 'TAB'
 
 KEYWORDS = [
     'double',
@@ -226,7 +225,10 @@ class Lexer:
                 else: tokens.append(Token(TT_PLUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '-':
-                tokens.append(Token(TT_MINUS, pos_start=self.pos))
+                self.peek()
+                if self.current_char_copy == '-':
+                    tokens.append(Token(TT_MINUSMINUS, pos_start=self.pos))
+                else: tokens.append(Token(TT_MINUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '*':
                 tokens.append(Token(TT_MUL, pos_start=self.pos))
@@ -256,6 +258,8 @@ class Lexer:
             elif self.current_char == '{':
                 tokens.append(Token(TT_OPENBRACKET, pos_start=self.pos))
                 self.advance()
+                if self.current_char == '\n':
+                    self.advance()
             elif self.current_char == '}':
                 tokens.append(Token(TT_CLOSEBRACKET, pos_start=self.pos))
                 self.advance()
@@ -459,10 +463,6 @@ class Translator:
                     self.translatedToken.append('print')
                     self.advance()
                 elif self.current_tok.value in DELETE:
-                    self.translatedToken.append('')
-                    self.advance()
-                elif self.current_tok.value == 'for':
-                    self.translatedToken.append(self.translate_for_loop())
                     self.advance()
                 elif self.current_tok.value in KEYWORDS:
                     self.translatedToken.append(self.current_tok.value)
@@ -503,59 +503,131 @@ class Translator:
                 elif self.current_tok.type == TT_GT:
                     self.translatedToken.append('>')
                     self.advance()
+                elif self.current_tok.type == TT_LTE:
+                    self.translatedToken.append('<=')
+                    self.advance()
+                elif self.current_tok.type == TT_GTE:
+                    self.translatedToken.append('>=')
+                    self.advance()
                 elif self.current_tok.type == TT_PLUSPLUS:
                     self.translatedToken.append('++')
+                    self.advance()
+                elif self.current_tok.type == TT_MINUSMINUS:
+                    self.translatedToken.append('--')
                     self.advance()
                 else:
                     self.translatedToken.append('EOF')
                     return self.translatedToken
 
-# #######################################
-# # Translate Keywords
-# #######################################
-# class Translate_Keywords:
-#     def __init__(self, tokens):
-#         self.tokens = tokens
-#         self.tok_idx = -1
-#         self.advance()
-#         self.translatedToken = []
-#
-#     def advance(self):
-#         self.tok_idx += 1
-#         if self.tok_idx < len(self.tokens):
-#             self.current_tok = self.tokens[self.tok_idx]
-#         return self.current_tok
-#
-#     def peek(self, peek_idx):
-#         self.tok_idx_copy = self.tok_idx
-#         self.tok_idx_copy += peek_idx
-#         if self.tok_idx_copy < len(self.tokens):
-#             self.current_tok_copy = self.tokens[self.tok_idx_copy]
-#         return self.current_tok_copy
-#
-#     def __repr__(self):
-#         return f'{self.current_tok}\n'
-#
-#     def translate_keywords(self):
-#             while self.current_tok != None:
-#                 if self.current_tok.value == 'for':
-#                     self.translatedToken.append(self.translate_for_loop())
-#                     self.advance()
-#                 else:
-#                     self.translatedToken.append(self.current_tok.value)
-#             return self.translatedToken
-#
-#     def translate_for_loop(self):
-#         self.translatedToken.append('for')
-#         identifier = ''
-#         range = ''
-#         increment = ''
-#         while self.current_tok_copy.type != TT_OPENBRACKET:
-#             if self.current_tok_copy.type == TT_LPAREN:
-#                 self.append
-#
-#
-#
+#######################################
+# Translate Keywords
+#######################################
+class Translate_Keywords:
+    def __init__(self, tokens):
+        self.tokens = tokens
+        self.tok_idx = -1
+        self.advance()
+        self.translatedKeywords = []
+
+    def advance(self):
+        self.tok_idx += 1
+        if self.tok_idx < len(self.tokens):
+            self.current_tok = self.tokens[self.tok_idx]
+        return self.current_tok
+
+    def peek(self):
+        self.tok_idx_copy = self.tok_idx
+        self.tok_idx_copy += 1
+        if self.tok_idx_copy < len(self.tokens):
+            self.current_tok_copy = self.tokens[self.tok_idx_copy]
+        return self.current_tok_copy
+
+    def __repr__(self):
+        return f'{self.current_tok}\n'
+
+    def translate_keywords(self):
+            while self.current_tok != None:
+                if self.current_tok == 'for':
+                    self.translate_for_loop()
+                    self.advance()
+                elif self.current_tok == 'while':
+                    self.translate_while_loop()
+                    self.advance()
+                elif self.current_tok == TT_EOF:
+                    self.translatedKeywords.append(self.current_tok)
+                    return self.translatedKeywords
+                else:
+                    self.translatedKeywords.append(self.current_tok)
+                    self.advance()
+
+    def translate_for_loop(self):
+        identifier = ''
+        start_pos = ''
+        end_pos = ''
+        increment = ''
+        end_pos_identifier = ''
+        range = identifier + 'in range(' + start_pos + ', ' + end_pos + ', ' + increment + ')'
+        while self.current_tok != ':\n\t':
+            if self.current_tok == '(':
+                self.advance()
+            elif self.current_tok == ')':
+                self.advance()
+            elif self.current_tok == '':
+                self.advance()
+            elif self.current_tok in KEYWORDS:
+                self.translatedKeywords.append(self.current_tok)
+                self.advance()
+            elif self.current_tok == '=':
+                self.peek()
+                if type(self.current_tok_copy) == int:
+                    start_pos = self.current_tok_copy
+                self.advance()
+            elif self.current_tok == '\n':
+                self.advance()
+            elif self.current_tok == '<':
+                self.peek()
+                if type(self.current_tok_copy) == int:
+                    end_pos = self.current_tok_copy
+                self.advance()
+            elif type(self.current_tok) == str:
+                self.peek()
+                if self.current_tok_copy == '=':
+                    identifier = self.current_tok
+                elif self.current_tok_copy == '++':
+                    increment = 1
+                self.advance()
+            elif type(self.current_tok) == int:
+                self.advance()
+            else:break
+        range = identifier + ' in range(' + str(start_pos) + ', ' + str(end_pos) + ', ' + str(increment) + ')'
+        self.translatedKeywords.append(range)
+        self.translatedKeywords.append(self.current_tok)
+
+    def translate_while_loop(self):
+        while self.current_tok != ':\n\t':
+            if self.current_tok == '(':
+                self.advance()
+            elif self.current_tok == ')':
+                self.advance()
+            elif self.current_tok == '':
+                self.advance()
+            elif self.current_tok == '<':
+                self.translatedKeywords.append(self.current_tok)
+                self.advance()
+            elif self.current_tok in KEYWORDS:
+                self.translatedKeywords.append(self.current_tok)
+                self.advance()
+            elif type(self.current_tok) == int:
+                self.translatedKeywords.append(self.current_tok)
+                self.advance()
+            elif type(self.current_tok) == str:
+                self.translatedKeywords.append(self.current_tok)
+                self.advance()
+            else:break
+        self.translatedKeywords.append(self.current_tok)
+
+
+
 # #######################################
 # # Write to Python file
 # #######################################
@@ -597,4 +669,6 @@ def run(fn, text):
     #Translate
     translator = Translator(tokens)
     result = translator.translate()
-    return result, None
+    keywords = Translate_Keywords(result)
+    final = keywords.translate_keywords()
+    return final, None
