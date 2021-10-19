@@ -1,3 +1,6 @@
+from translator import *
+from tokens import *
+from write_translated_tokens import *
 #######################################
 # CONSTANTS
 #######################################
@@ -6,13 +9,12 @@ import string
 DIGITS = '0123456789'
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
-WEIRD_LETTERS = LETTERS + DIGITS + '.' + '_' + ' ' + '"' + ":" + ";"
+WEIRD_LETTERS = LETTERS + DIGITS + '.' + '_' + ' ' + '"' + ":" + ";" + ','
 
 
 #######################################
 # ERRORS
 #######################################
-
 class Error:
     def __init__(self, pos_start, pos_end, error_name, details):
         self.pos_start = pos_start
@@ -38,141 +40,26 @@ class InvalidSyntaxError(Error):
         super().__init__(pos_start, pos_end, "Invalid Syntax", details)
 
 #######################################
-# POSITION
-#######################################
+# POSITION###########
 
 class Position:
-	def __init__(self, idx, ln, col, fn, ftxt):
-		self.idx = idx
-		self.ln = ln
-		self.col = col
-		self.fn = fn
-		self.ftxt = ftxt
+    def __init__(self, idx, ln, col, fn, ftxt):
+        self.idx = idx
+        self.ln = ln
+        self.col = col
+        self.fn = fn
+        self.ftxt = ftxt
 
-	def advance(self, current_char=None):
-		self.idx += 1
-		self.col += 1
+    def advance(self, current_char=None):
+        self.idx +=1
+        self.col += 1
+        if current_char =='\n':
+            self.ln += 1
+            self.col = 0
+        return self
 
-		if current_char == '\n':
-			self.ln += 1
-			self.col = 0
-
-		return self
-
-	def copy(self):
-		return Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
-
-#######################################
-# TOKENS
-#######################################
-
-TT_INT			= 'INT'
-TT_FLOAT    	= 'FLOAT'
-TT_IDENTIFIER	= 'IDENTIFIER'
-TT_KEYWORD		= 'KEYWORD'
-TT_PLUS     	= 'PLUS'
-TT_MINUS    	= 'MINUS'
-TT_MUL      	= 'MUL'
-TT_DIV      	= 'DIV'
-TT_POW			= 'POW'
-TT_EQ			= 'EQ'
-TT_LPAREN   	= 'LPAREN'
-TT_RPAREN   	= 'RPAREN'
-TT_EE			= 'EE' #
-TT_NE		    = 'NE' #
-TT_LT		    = 'LT' #
-TT_GT			= 'GT' #
-TT_LTE			= 'LTE' #
-TT_GTE			= 'GTE' #
-TT_EOF			= 'EOF'
-TT_NEWLINE      = 'NEWLINE'
-TT_OPENBRACKET  = 'OPENBRACKET'
-TT_CLOSEBRACKET = 'CLOSEBRACKET'
-TT_QUOTE        = 'QUOTE'
-TT_LARRAY       = 'LARRAY'
-TT_RARRAY       = 'RARRAY'
-TT_COMMA        = 'COMMA'
-
-KEYWORDS = [
-    'double',
-    'String',
-    'System.out.print',
-    'System.out.println',
-    'args',
-    'main',
-
-    'abstract',
-    'continue',
-    'for',
-    'new',
-    'switch',
-    'assert',
-    'default',
-    'goto',
-    'package',
-    'synchronized',
-    'boolean',
-    'do',
-    'if',
-    'private',
-    'this',
-    'break',
-    'double',
-    'implements',
-    'protected',
-    'throw',
-    'byte',
-    'else',
-    'import',
-    'public',
-    'throws',
-    'case',
-    'enum',
-    'instanceof',
-    'return',
-    'transient',
-    'catch',
-    'extends',
-    'int',
-    'short',
-    'try',
-    'char',
-    'final',
-    'interface',
-    'static',
-    'void',
-    'class',
-    'finally',
-    'long',
-    'strictfp',
-    'volatile',
-    'const',
-    'float',
-    'native',
-    'super',
-    'while'
-]
-
-class Token:
-    def __init__(self, type_, value=None, pos_start=None, pos_end=None):
-        self.type = type_
-        self.value = value
-
-        if pos_start:
-            self.pos_start = pos_start.copy()
-            self.pos_end = pos_start.copy()
-            self.pos_end.advance()
-
-        if pos_end:
-            self.pos_end = pos_end.copy()
-
-    def matches(self, type_, value):
-        return self.type == type_ and self.value == value
-
-    def __repr__(self):
-        if self.value: return f'{self.type}:{self.value}\n'
-        return f'{self.type}\n'
-
+    def copy(self):
+        return  Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
 #######################################
 # LEXER
 #######################################
@@ -184,10 +71,16 @@ class Lexer:
         self.pos = Position(-1, 0, -1, fn, text)
         self.current_char = None
         self.advance()
+        self.current_char_copy = None
 
     def advance(self):
         self.pos.advance(self.current_char)
         self.current_char = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
+
+    def peek(self):
+        self.current_char_copy = self.current_char
+        self.pos.advance(self.current_char_copy)
+        self.current_char_copy = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
 
     def make_tokens(self):
         tokens = []
@@ -198,7 +91,10 @@ class Lexer:
             elif self.current_char == ';':
                 tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
                 self.advance()
+                if self.current_char == '\n':
+                    self.advance()
             elif self.current_char == '\n':
+                tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '"':
                 tokens.append(self.make_print_statement())
@@ -211,10 +107,20 @@ class Lexer:
             elif self.current_char in LETTERS:
                 tokens.append(self.make_identifier())
             elif self.current_char == '+':
-                tokens.append(Token(TT_PLUS, pos_start=self.pos))
+                self.peek()
+                if self.current_char_copy == '+':
+                    tokens.append(Token(TT_PLUSPLUS, pos_start=self.pos))
+                elif self.current_char_copy == '=':
+                    tokens.append(Token(TT_PLUSEQ, pos_start=self.pos))
+                else: tokens.append(Token(TT_PLUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '-':
-                tokens.append(Token(TT_MINUS, pos_start=self.pos))
+                self.peek()
+                if self.current_char_copy == '-':
+                    tokens.append(Token(TT_MINUSMINUS, pos_start=self.pos))
+                elif self.current_char_copy == '=':
+                    tokens.append(Token(TT_MINUSEQ, pos_start=self.pos))
+                else: tokens.append(Token(TT_MINUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '*':
                 tokens.append(Token(TT_MUL, pos_start=self.pos))
@@ -244,6 +150,8 @@ class Lexer:
             elif self.current_char == '{':
                 tokens.append(Token(TT_OPENBRACKET, pos_start=self.pos))
                 self.advance()
+                if self.current_char == '\n':
+                    self.advance()
             elif self.current_char == '}':
                 tokens.append(Token(TT_CLOSEBRACKET, pos_start=self.pos))
                 self.advance()
@@ -347,16 +255,29 @@ class Lexer:
                     break
             self.advance()
 
-        tok_type = TT_KEYWORD if id_str in KEYWORDS else TT_IDENTIFIER
+        tok_type = TT_STRING
         return Token(tok_type, id_str, pos_start, self.pos)
-
 
 #######################################
 # RUN
 #######################################
 
 def run(fn, text):
+    #Generate tokens
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
+    if error: return None, error
 
-    return tokens, error
+    #Generate AST
+    # parser = Parser(tokens)
+    # ast = parser.parse()
+
+    #Translate
+    translator = Translator(tokens)
+    result = translator.translate()
+    keywords = Translate_Keywords(result)
+    final = keywords.translate_keywords()
+    write = write_tranlsated_tokens(final)
+    working = write.write_to_file()
+
+    return final, None
