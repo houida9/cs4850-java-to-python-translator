@@ -1,9 +1,13 @@
+var javaText = "";
+
 // Disable download buttons when the text area is empty
 setInterval(function() { 
   if(document.getElementById('javaTextArea').value.trim().length > 0) { 
       document.getElementById('javadownload').disabled = false; 
+      document.getElementById('clearchanges').disabled = false;
   } else{
     document.getElementById('javadownload').disabled = true; 
+    document.getElementById('clearchanges').disabled = true;
   }
 
   if(document.getElementById('pythonTextArea').value.trim().length > 0){ 
@@ -43,6 +47,10 @@ function downloadJavaFile(filename){
     document.body.removeChild(element);
 }
 
+function clearChanges() {
+  document.getElementById('javaTextArea').value = javaText;
+}
+
 // Copy uploaded file to the Java text area
 document.getElementById('inputfile')
   .addEventListener('change', function() {
@@ -51,10 +59,13 @@ document.getElementById('inputfile')
 
           document.getElementById('javaTextArea')
               .value = fr.result;
+
+          javaText = fr.result;
       }
 
       fr.readAsText(this.files[0]);
-      document.getElementById('inputfile').value = ''; // change to '' if u want reload behavior
+      document.getElementById('inputfile').value = fr.filename;
+      clearChanges();
   })
 
 // Activate TAB spaces in Java text area

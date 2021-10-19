@@ -27,6 +27,12 @@ textarea {
     float: right;
 }
 
+#clearchanges {
+    margin-right: 20px;
+    float: left;
+    margin-top: 10px;
+}
+
 #pythondownload {
     margin-top: 60px
 }
