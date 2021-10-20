@@ -1,6 +1,6 @@
-from translator import *
-from tokens import *
-from write_translated_tokens import *
+from .translator import *
+from .tokens import *
+from .write_translated_tokens import *
 #######################################
 # CONSTANTS
 #######################################
@@ -9,7 +9,7 @@ import string
 DIGITS = '0123456789'
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
-WEIRD_LETTERS = LETTERS + DIGITS + '.' + '_' + ' ' + '"' + ":" + ";" + ','
+WEIRD_LETTERS = LETTERS + DIGITS + '.' + '_' + ' ' + '"' + ":" + ";" + ',' + '\\'
 
 
 #######################################
@@ -81,7 +81,7 @@ class Lexer:
         self.current_char_copy = self.current_char
         self.pos.advance(self.current_char_copy)
         self.current_char_copy = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
-
+        
     def make_tokens(self):
         tokens = []
 
@@ -93,8 +93,7 @@ class Lexer:
                 self.advance()
                 if self.current_char == '\n':
                     self.advance()
-            elif self.current_char == '\n':
-                tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
+            elif self.current_char == '\n' or self.current_char == '\r':
                 self.advance()
             elif self.current_char == '"':
                 tokens.append(self.make_print_statement())
@@ -126,8 +125,13 @@ class Lexer:
                 tokens.append(Token(TT_MUL, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '/':
-                tokens.append(Token(TT_DIV, pos_start=self.pos))
-                self.advance()
+                self.peek()
+                if self.current_char_copy in ('/*'):
+                    self.handle_comments()
+                    self.advance()
+                else:
+                    tokens.append(Token(TT_DIV, pos_start=self.pos))
+                    self.advance()
             elif self.current_char == '^':
                 tokens.append(Token(TT_POW, pos_start=self.pos))
                 self.advance()
@@ -257,6 +261,18 @@ class Lexer:
 
         tok_type = TT_STRING
         return Token(tok_type, id_str, pos_start, self.pos)
+    
+
+    def handle_comments(self):
+        # handle /* */ comments
+        if self.current_char == '/' and self.current_char_copy == '*':
+            while self.current_char != None and self.current_char == '*' and self.current_char_copy == '/':
+                self.advance()
+                self.peek()
+        # handle // comments
+        else:
+            while self.current_char != None and self.current_char != '\n':
+                self.advance()
 
 #######################################
 # RUN
@@ -266,7 +282,8 @@ def run(fn, text):
     #Generate tokens
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
-    if error: return None, error
+    if error: 
+        return None, error
 
     #Generate AST
     # parser = Parser(tokens)
@@ -277,7 +294,7 @@ def run(fn, text):
     result = translator.translate()
     keywords = Translate_Keywords(result)
     final = keywords.translate_keywords()
-    write = write_tranlsated_tokens(final)
-    working = write.write_to_file()
+    # write = write_tranlsated_tokens(final)
+    # working = write.write_to_file()
 
     return final, None

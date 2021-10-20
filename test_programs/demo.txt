@@ -1,6 +1,0 @@
-public class HelloWorld {
-    while(i < 3){
-        System.out.print(i);
-        i += 1;
-    }
-}

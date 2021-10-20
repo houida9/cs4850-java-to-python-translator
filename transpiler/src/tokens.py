@@ -1,5 +1,5 @@
-from scanner import *
-from translator import *
+from .scanner import *
+from .translator import *
 
 TT_INT			= 'INT'
 TT_STRING       = 'STRING'
@@ -111,5 +111,5 @@ class Token:
         return self.type == type_ and self.value == value
 
     def __repr__(self):
-        if self.value: return f'{self.type}:{self.value}\n'
-        return f'{self.type}\n'
+        if self.value: return f'{self.type}:{self.value}'
+        return f'{self.type}'

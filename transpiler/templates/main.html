@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -5,11 +6,11 @@
       <title>JavaToPython</title>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-      <link rel="stylesheet" href="main.css">
+      <link rel="stylesheet" href="{% static 'main.css' %}">
   </head>
   <body>
     <header id="header" class="masthead">
-      <div class="container h-100">
+      <div class="container h-10">
         <div class="row h-100 align-items-center">
           <div class="col-12 text-center">
             <h1 class="fw-light">Java to Python Transpiler</h1>
@@ -23,13 +24,13 @@
     <div class="container">
         <div class="row align-items-center" style="background-color: #aaabb8d0; box-shadow: 10px 10px 10px 10px #888888;border-radius: 10px;">
           <div class="col-lg-4 d-flex justify-content-center text-center">
-            <img class="img-fluid" style="height: 180px; width: 130px" src="../assets/java.png" alt="Java image">
+            <img class="img-fluid" style="height: 180px; width: 130px" src="{% static "assets/java.png" %}" alt="Java image">
           </div>
           <div class="col-lg-4 d-flex justify-content-center text-center">
             <i class="img-fluid fas fa-arrow-circle-right" style="font-size: 6em"></i>
           </div>
           <div class="col-lg-4 d-flex justify-content-center text-center">
-            <img class="img-fluid" style="height: 140px; width: 170px;" src="../assets/python.png" alt="python image">
+            <img class="img-fluid" style="height: 140px; width: 170px;" src="{% static "assets/python.png" %}" alt="python image">
           </div>
         </div>
 
@@ -42,17 +43,24 @@
                 onclick="downloadJavaFile('original.java')"  disabled>Download
 
                 </button>
-                <button class="btn btn-danger" id="clearchanges"
+                <button class="btn btn-sm btn-danger" id="clearchanges"
                   onclick="clearChanges()" disabled>Clear Changes
                 </button>
-              </div>      
-              <textarea id="javaTextArea" name="javaTextArea" withspellcheck="false" rows="25" cols="80"></textarea>
+              </div> 
+              <form id="translateForm" method="post" action="" class="form-inline">    
+                {% csrf_token %}
+                <!-- TRANSLATE button -->
+                  <button style="position: absolute;" id="translate" class="btn btn-info btn-lg" 
+                    type="submit" value="translate" name="translate">Translate
+                  </button>
+              </form>
+
+              <textarea form="translateForm" id="javaTextArea" name="javaTextArea" withspellcheck="false" rows="25" cols="80"></textarea>
             </div>
 
-            <!-- TRANSLATE button -->
-            <div class="col-lg-2" style="position: relative;">
-              <button id="translate" class="btn btn-info btn-lg" type="button">Translate</button>
-            </div>
+              <div class="col-lg-2">
+              </div>
+
 
             <!-- PYTHON -->
             <div class="col-lg-5">
@@ -63,8 +71,15 @@
               <textarea readonly id="pythonTextArea" name="pythonTextArea" withspellcheck="false" rows="25" cols="80">
               </textarea>
             </div>
+
+            {% if submitted %} 
+                <script>
+                  document.getElementById('pythonTextArea').value =  String.raw`{{ python_code|safe }}`
+                  document.getElementById('javaTextArea').value =  String.raw`{{ java_code|safe }}`
+                </script>
+            {% endif %}
         </div>
     </div>
-    <script src="main.js"></script>
+    <script src="{% static 'main.js'%}"></script>
   </body>
 </html>

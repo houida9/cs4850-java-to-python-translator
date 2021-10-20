@@ -1,4 +1,5 @@
 var javaText = "";
+var fileName = "";
 
 // Disable download buttons when the text area is empty
 setInterval(function() { 
@@ -51,12 +52,18 @@ function clearChanges() {
   document.getElementById('javaTextArea').value = javaText;
 }
 
+
+document.getElementById('inputfile').addEventListener('click', function (evt) {
+  this.value = null;
+});
+
 // Copy uploaded file to the Java text area
 document.getElementById('inputfile')
   .addEventListener('change', function() {
       var fr = new FileReader();
       fr.onload = function(){
-
+          
+          fileName = fr.fileName;
           document.getElementById('javaTextArea')
               .value = fr.result;
 
@@ -64,8 +71,6 @@ document.getElementById('inputfile')
       }
 
       fr.readAsText(this.files[0]);
-      document.getElementById('inputfile').value = fr.filename;
-      clearChanges();
   })
 
 // Activate TAB spaces in Java text area

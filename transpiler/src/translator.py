@@ -1,5 +1,5 @@
-from scanner import *
-from tokens import *
+from .scanner import *
+from .tokens import *
 
 #######################################
 # Translator & Deleted keywords

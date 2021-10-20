@@ -1,6 +1,6 @@
-from scanner import *
-from translator import *
-from tokens import *
+from .scanner import *
+from .translator import *
+from .tokens import *
 
 #######################################
 # Write to Python file
@@ -26,7 +26,7 @@ class write_tranlsated_tokens:
         return  self.current_tok_copy
 
     def write_to_file(self):
-        f = open("C:\cs4850-java-to-python-translator\output_python/output.py", "a")
+        f = open("transpiler/python_output/output.py", "w+")
 
         while self.current_tok != 'EOF':
             f.write(str(self.current_tok) + ' ')
