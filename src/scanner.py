@@ -9,7 +9,7 @@ import string
 DIGITS = '0123456789'
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
-WEIRD_LETTERS = LETTERS + DIGITS + '.' + '_' + ' ' + '"' + ":" + ";" + ','
+WEIRD_LETTERS = LETTERS + DIGITS + '.' + '_' + ' ' + '"' + ":" + ";" + ',' + '!'
 
 
 #######################################
@@ -123,10 +123,19 @@ class Lexer:
                 else: tokens.append(Token(TT_MINUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '*':
-                tokens.append(Token(TT_MUL, pos_start=self.pos))
+                self.peek()
+                if self.current_char_copy == '=':
+                    tokens.append(Token(TT_MULEQ, pos_start=self.pos))
+                else:
+                    tokens.append(Token(TT_MUL, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '/':
-                tokens.append(Token(TT_DIV, pos_start=self.pos))
+                self.peek()
+                if self.current_char_copy == '=':
+                    tokens.append(Token(TT_DIVEQ, pos_start=self.pos))
+                else:
+                    tokens.append(Token(TT_DIV, pos_start=self.pos))
+                self.advance()
                 self.advance()
             elif self.current_char == '^':
                 tokens.append(Token(TT_POW, pos_start=self.pos))

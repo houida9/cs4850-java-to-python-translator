@@ -164,11 +164,11 @@ class Translator:
                 elif self.current_tok.type == TT_MINUSMINUS:
                     self.translatedToken.append('-= 1')
                     self.advance()
-                elif self.current_tok.type == TT_MINUSEQ:
-                    self.translatedToken.append('-=')
+                elif self.current_tok.type == TT_MULEQ:
+                    self.translatedToken.append('*=')
                     self.advance()
-                elif self.current_tok.type == TT_PLUSEQ:
-                    self.translatedToken.append('+=')
+                elif self.current_tok.type == TT_DIVEQ:
+                    self.translatedToken.append('/=')
                     self.advance()
                 else:
                     self.translatedToken.append('EOF')
@@ -244,13 +244,38 @@ class Translate_Keywords:
                 self.peek()
                 if type(self.current_tok_copy) == int:
                     end_pos = self.current_tok_copy
+                elif type(self.current_tok_copy) == str:
+                    end_pos = self.current_tok_copy
+                self.advance()
+            elif self.current_tok == '<=':
+                self.peek()
+                if type(self.current_tok_copy) == int:
+                    end_pos = self.current_tok_copy + 1
+                elif type(self.current_tok_copy) == str:
+                    end_pos = self.current_tok_copy + ' + 1'
+                self.advance()
+            elif self.current_tok == '>':
+                self.peek()
+                if type(self.current_tok_copy) == int:
+                    end_pos = self.current_tok_copy
+                elif type(self.current_tok_copy) == str:
+                    end_pos = self.current_tok_copy
+                self.advance()
+            elif self.current_tok == '>=':
+                self.peek()
+                if type(self.current_tok_copy) == int:
+                    end_pos = self.current_tok_copy - 1
+                elif type(self.current_tok_copy) == str:
+                    end_pos = self.current_tok_copy + ' - 1'
                 self.advance()
             elif type(self.current_tok) == str:
                 self.peek()
                 if self.current_tok_copy == '=':
                     identifier = self.current_tok
-                elif self.current_tok_copy == '++':
+                elif self.current_tok_copy == '+= 1':
                     increment = 1
+                elif self.current_tok_copy == '-= 1':
+                    increment = -1
                 self.advance()
             elif type(self.current_tok) == int:
                 self.advance()

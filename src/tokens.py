@@ -34,6 +34,8 @@ TT_PRINT        = 'PRINT'
 TT_TAB          = 'TAB'
 TT_PLUSEQ       = '+='
 TT_MINUSEQ       = '-='
+TT_MULEQ        = '*='
+TT_DIVEQ        = '/='
 
 KEYWORDS = [
     'double',
