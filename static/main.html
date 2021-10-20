@@ -39,8 +39,12 @@
               <div class="custom-file">
                 <input type="file" class="custom-file-input form-control" id="inputfile"/>
                 <button class="btn btn-success" type="button" id="javadownload"
-                onclick="downloadJavaFile('original.java')"  disabled>
-                  Download</button>
+                onclick="downloadJavaFile('original.java')"  disabled>Download
+
+                </button>
+                <button class="btn btn-danger" id="clearchanges"
+                  onclick="clearChanges()" disabled>Clear Changes
+                </button>
               </div>      
               <textarea id="javaTextArea" name="javaTextArea" withspellcheck="false" rows="25" cols="80"></textarea>
             </div>
