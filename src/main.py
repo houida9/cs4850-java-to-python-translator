@@ -1,4 +1,4 @@
-import parser as parser
+import parser2 
 from os import listdir
 from os.path import isfile, join, splitext
 
@@ -20,7 +20,7 @@ for input_file in java_programs:
   print(f"\nScanning {input_path}")
 
   text = open(input_path, "r+")
-  result, error = parser.run(input_path, text.read())
+  result, error = parser2.run(input_path, text.read())
 
   if error: 
     print(error.as_string())
