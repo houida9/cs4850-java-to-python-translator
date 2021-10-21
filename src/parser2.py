@@ -1,5 +1,4 @@
 from os import read
-from project_parser import KeywordNode
 from scanner import *
 
 basicTypes = [
@@ -77,6 +76,13 @@ class InitilizationNode:
     
     def __repr__(self): 
         return f'({self.basicType}, {self.tok}, {self.op_tok}, {self.eqTo})'
+
+class KeywordNode:
+    def __init__(self, tok):
+        self.tok = tok
+    
+    def __repr__(self):
+        return f'{self.tok}'
 
 
 
@@ -317,7 +323,10 @@ def run(fn, text):
     values = []
     while parser.current_tok != None and parser.current_tok.type != TT_EOF: 
         res = parser.read_program()
-        if res.error : print(res.error.as_string())
+        if res.error : 
+            print(res.error.as_string())
+            values = []
+            break
         values.append(res)
 
     #get nodes
