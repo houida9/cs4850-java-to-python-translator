@@ -68,6 +68,7 @@ class Position:
 
 TT_INT			= 'INT'
 TT_FLOAT    	= 'FLOAT'
+TT_DOUBLE       = 'DOUBLE'
 TT_IDENTIFIER	= 'IDENTIFIER'
 TT_KEYWORD		= 'KEYWORD'
 TT_PLUS     	= 'PLUS'
