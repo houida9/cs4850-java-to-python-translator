@@ -84,7 +84,24 @@ class KeywordNode:
     def __repr__(self):
         return f'{self.tok}'
 
+class StringNode: 
+    def __init__(self, lquote, tok, rquote): 
+        self.lquote = lquote
+        self.tok = tok
+        self.rquote = rquote
+    
+    def __repr__(self): 
+        return f'({self.lquote}, {self.tok}, {self.rquote})'
 
+class ObjectNode: 
+    def __init__(self, className, lparen, param, rparen): 
+        self.className = className
+        self.lparen = lparen
+        self.param = param
+        self.rparen = rparen
+    
+    def __repr__(self): 
+        return f'({self.className}, {self.lparen}, {self.param}, {self.rparen})'
 
 
 #######################################
@@ -101,6 +118,13 @@ class Parser:
         if self.tok_idx < len(self.tokens):
             self.current_tok = self.tokens[self.tok_idx]
         return self.current_tok
+    
+    def peek(self, peek_idx):
+        self.tok_idx_copy = self.tok_idx
+        self.tok_idx_copy += peek_idx
+        if self.tok_idx_copy < len(self.tokens):
+            self.current_tok_copy = self.tokens[self.tok_idx_copy]
+        return self.current_tok_copy
     
     def parse(self):
          #res = self.expr()
@@ -173,23 +197,73 @@ class Parser:
 ################
 # Identifiers and Keywords
 ################
+    def paren(self): 
+        res = ParseResult()
+        binaryOp = []
+        if self.current_tok.type == TT_LPAREN:
+            binaryOp.append(self.current_tok)
+            res.register(self.advance())
+
+            while self.current_tok.type != TT_RPAREN:
+                binaryOp.append(self.current_tok)
+                res.register(self.advance())
+
+                if self.current_tok.type == TT_EOF:
+                    return res.error(InvalidSyntaxError (self.current_tok.pos_start, self.current_tok.pos_end, 
+        ' Expected )'))
+
+        binaryOp.append(self.current_tok)
+        res.register(self.advance())
+        return binaryOp
+
+
     def initilize(self, basicType): 
         res = ParseResult()
-        res.register(self.advance())
         nodes = []
         while self.current_tok.type != TT_NEWLINE:
-            op = None
+            op = TT_EQ
+            eqTo = None
+            #iden = None
+            binaryOp = []
+            binary = False
+
             if self.current_tok.type == TT_IDENTIFIER: 
-                iden = self.current_tok
-                res.register(self.advance())
+                peek = self.peek(1)
+                if peek.type == TT_LPAREN: 
+                    binary = True
+                    className = self.current_tok
+                    res.register(self.advance())
+                    values = self.paren()
+                    binaryOp.append(ObjectNode(className, values[0], values[1], values[2]))
+                else:
+                    print("NOT CAUGHT")
+                    iden = self.current_tok
+                    res.register(self.advance())
 
-            if self.current_tok.type == TT_EQ: 
-                op = self.current_tok 
-                res.register(self.advance())
-                eqTo = self.current_tok
-                res.register(self.advance())
+            if self.current_tok.type == TT_EQ:
+                res.register(self.advance()) 
+                if self.current_tok.type == TT_LPAREN:
+                    binary = True
+                    binaryOp = self.paren()
+                else: 
+                    eqTo = self.current_tok
+                    binaryOp.append(eqTo)
+                    res.register(self.advance())
 
+
+                while self.current_tok.type in (TT_PLUS, TT_MINUS, TT_MUL, TT_DIV): 
+                    binary = True
+                    binaryOp.append(self.current_tok)
+                    res.register(self.advance())
+                    binaryOp.append(self.current_tok)
+                    res.register(self.advance())
             
+            if self.current_tok.type == TT_LPAREN:
+                binary = True
+                values = self.paren()
+                binaryOp.append(values)
+                
+            if binary: eqTo = binaryOp
             node = InitilizationNode(basicType, iden, op, eqTo)
             nodes.append(node)
             #Handle same line declarations
@@ -199,6 +273,7 @@ class Parser:
             if self.current_tok.type == TT_EOF: 
                 return res.error(InvalidSyntaxError (self.current_tok.pos_start, self.current_tok.pos_end, 
                 'Not a statement. ; Expected.'))
+
         return nodes
         
         
@@ -209,8 +284,10 @@ class Parser:
         tok = self.current_tok
 
         if tok.type == TT_KEYWORD:
+            #initialize variables
             if tok.value in ('int', 'double', 'float', 'String', 'boolean'): 
                 basicType = tok.value
+                res.register(self.advance())
                 values = self.initilize(basicType)
                 res.register(self.advance())
                 return res.success(values)
@@ -219,14 +296,32 @@ class Parser:
                 return res.success(KeywordNode(tok))
 
         elif tok.type == TT_IDENTIFIER:
-            res.register(self.advance())  
-            return res.success(IdentifierNode(tok))
+            peek = self.peek(1)
+            if peek.type == TT_EQ:
+                values = self.initilize('int')
+                res.register(self.advance())
+                return res.success(values)
+            if peek.type == TT_PLUS:
+                op = []
+                id1 = IdentifierNode(tok)
+                op.append(id1)
+                res.register(self.advance())
+                op.append(self.current_tok)
+                res.register(self.advance())
+                id2 = IdentifierNode(self.current_tok)
+                op.append(id2)
+                res.register(self.advance())
+                return res.success(op)
+            else:   
+                res.register(self.advance())
+                return res.success(IdentifierNode(tok))
 
         elif tok.type in TT_OPENBRACKET:
             opn = tok
             body = []
             res.register(self.advance())
             while self.current_tok.type != TT_CLOSEBRACKET:
+                print(self.current_tok)
                 body.append(res.register(self.read_program()))
 
                 if self.current_tok.type == TT_EOF:
@@ -268,11 +363,28 @@ class Parser:
             close = self.current_tok
             res.register(self.advance())
             return res.success(BracketNode(opn, body, close))
+        
+        elif tok.value == '"':
+            lquote = tok
+            res.register(self.advance())
+            words = []
+            while self.current_tok.value != '"':
+                words.append(self.current_tok)
+                res.register(self.advance())
+
+                if self.current_tok.type == TT_EOF:
+                     return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, 
+                    'Expected "'))
+
+            rquote = self.current_tok
+            res.register(self.advance())
+            return res.success(StringNode(lquote, words, rquote))
 
         elif tok.type == TT_NEWLINE: 
             res.register(self.advance())
             return res.success(NewLineNode(tok))
 
+        #Implement some type of error handling here
         else: 
             print(self.current_tok, tok)
             return None
