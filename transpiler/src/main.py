@@ -1,14 +1,13 @@
-import scanner
-import parser
+from scanner import run
 from os import listdir
 from os.path import isfile, join, splitext
 
 ################################################################
-# Define a "demo.txt" with simple expressions in the src folder
+# Define a "demo_file.txt" with simple expressions in the src folder
 ################################################################
 
-input_dir = "transpiler/test_programs"
-output_dir = "transpiler/output"
+input_dir = "C:/Users\hreec/PycharmProjects/Java-to_python_backend/demo_file"
+output_dir = "C:/Users/hreec/PycharmProjects/Java-to_python_backend/demo_tokens"
 
 
 java_programs = [file for file in listdir(input_dir)
@@ -16,12 +15,12 @@ java_programs = [file for file in listdir(input_dir)
 
 for input_file in java_programs:  
   input_path = join(input_dir, input_file)
-  output_path = join(output_dir, f"{splitext(input_file)[0]}_parsed.txt")
+  output_path = join(output_dir, f"{splitext(input_file)[0]}_tokens.txt")
   
   print(f"\nScanning {input_path}")
 
   text = open(input_path, "r+")
-  result, error = scanner.run(input_path, text.read())
+  result, error = run(input_path, text.read()) # scanner.run
 
   if error: 
     print(f"Error > {output_path}\n")

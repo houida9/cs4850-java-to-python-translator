@@ -2,3 +2,4 @@
 *_tokens.txt
 *_parsed.txt
 *.pyc
+*.sqlite3

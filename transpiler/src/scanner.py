@@ -1,6 +1,8 @@
 from .translator import *
 from .tokens import *
 from .write_translated_tokens import *
+
+
 #######################################
 # CONSTANTS
 #######################################
@@ -300,7 +302,7 @@ def run(fn, text):
     result = translator.translate()
     keywords = Translate_Keywords(result)
     final = keywords.translate_keywords()
-    # write = write_tranlsated_tokens(final)
-    # working = write.write_to_file()
+    write = write_tranlsated_tokens(final)
+    working = write.write_to_file()
 
     return final, None
