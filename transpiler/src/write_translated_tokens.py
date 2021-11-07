@@ -12,7 +12,8 @@ class write_tranlsated_tokens:
         self.space_count = 0
         self.line_count = 1
         self.advance()
-        self.f = open("C:/Users/hreec/PycharmProjects/Java-to_python_backend/python_output/output.py", "w+")
+        self.result = []
+        self.file = open("transpiler/python_output/output.py", "w+")
 
     def advance(self):
         self.tok_idx += 1
@@ -27,18 +28,17 @@ class write_tranlsated_tokens:
         if self.tok_idx_copy < len(self.tokens):
             self.current_tok_copy = self.tokens[self.tok_idx_copy]
         return  self.current_tok_copy
-
-    def write_to_file(self):
-        print("\nWriting to an output.py file...\n")
+    
+    def write_to_frontend(self):
         close_bracket_count = 0
         while self.current_tok != 'EOF':
             if self.current_tok == 'OPENBRACKET':
-                self.f.write(':\n')
+                self.result.append(':\n')
                 self.space_count += 4
                 self.line_count += 1
                 self.advance()
             elif self.current_tok == 'NEWLINE':
-                self.f.write('\n')
+                self.result.append('\n')
                 self.line_count += 1
                 self.advance()
             elif self.current_tok == 'CLOSEBRACKET':
@@ -51,28 +51,63 @@ class write_tranlsated_tokens:
             elif self.current_tok == 'EOF':
                 break
             else:
-                self.f.write(str(self.write_space_count()))
+                self.result.append(str(self.write_space_count()))
                 self.scan_line()
-        self.f.close()
+        return self.result
+        
+
+    def write_to_file(self):        
+        print("\nWriting to an output.py file...\n")
+        self.write_to_frontend()
+        for line in self.result:
+            print(line)
+            self.file.write(str(line))
+        # close_bracket_count = 0
+        # while self.current_tok != 'EOF':
+        #     if self.current_tok == 'OPENBRACKET':
+        #         self.file.write(':\n')
+        #         self.space_count += 4
+        #         self.line_count += 1
+        #         self.advance()
+        #     elif self.current_tok == 'NEWLINE':
+        #         self.file.write('\n')
+        #         self.line_count += 1
+        #         self.advance()
+        #     elif self.current_tok == 'CLOSEBRACKET':
+        #         close_bracket_count += 1
+        #         # if close_bracket_count == 1:
+        #         #     self.advance()
+        #         # else:
+        #         self.space_count -= 4
+        #         self.advance()
+        #     elif self.current_tok == 'EOF':
+        #         break
+        #     else:
+        #         self.file.write(str(self.write_space_count()))
+        #         for line in self.scan_line():
+        #             print(line)
+        #             self.file.write("houida")
+        #             self.file.write(line)
+        self.file.close()
 
     def write_space_count(self):
         if self.space_count == 0:
-            self.f.write('')
+            self.result.append('')
             return ''
         elif self.space_count == 4:
-            self.f.write('\t')
+            self.result.append('\t')
             return ''
         elif self.space_count == 8:
-            self.f.write('\t\t')
+            self.result.append('\t\t')
             return ''
         elif self.space_count == 12:
-            self.f.write('\t\t\t')
+            self.result.append('\t\t\t')
             return ''
         elif self.space_count == 16:
-            self.f.write('\t\t\t\t')
+            self.result.append('\t\t\t\t')
             return ''
         elif self.space_count == 20:
-            self.f.write('\t\t\t\t\t')
+            self.result.append('\t\t\t\t\t')
             return ''
         else: return ''
 
@@ -81,7 +116,7 @@ class write_tranlsated_tokens:
             if self.current_tok == 'EOF':
                 break
             elif self.current_tok != 'OPENBRACKET' and self.current_tok != 'NEWLINE':
-                self.f.write(str(self.current_tok) + ' ')
+                self.result.append(str(self.current_tok) + ' ')
                 self.advance()
             else: break
 

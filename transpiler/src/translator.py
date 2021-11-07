@@ -249,6 +249,7 @@ class Translator:
                 else:
                     self.translatedToken.append('EOF')
                     return self.translatedToken
+                
     def make_print(self):
         while self.current_tok.type != TT_NEWLINE:
             if self.current_tok.value == 'System.out.print' or self.current_tok.value == 'System.out.println':

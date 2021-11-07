@@ -69,7 +69,7 @@ class Position:
 class Lexer:
     def __init__(self, fn, text):
         self.fn = fn
-        self.text = text
+        self.text = text.replace('\r', '')
         self.pos = Position(-1, 0, -1, fn, text)
         self.current_char = None
         self.advance()
@@ -95,7 +95,8 @@ class Lexer:
                 self.advance()
                 if self.current_char == '\n':
                     self.advance()
-            elif self.current_char == '\n' or self.current_char == '\r':
+            elif self.current_char == '\n':
+                tokens.append(Token(TT_NEWLINE))
                 self.advance()
             elif self.current_char == '"':
                 tokens.append(self.make_print_statement())
@@ -133,8 +134,7 @@ class Lexer:
             elif self.current_char == '/':
                 self.peek()
                 if self.current_char_copy in ('/*'):
-                    self.handle_comments()
-                    self.advance()
+                    tokens.append(self.handle_comments())
                 elif self.current_char_copy == '=':
                     tokens.append(Token(TT_DIVEQ, pos_start=self.pos))
                 else:
@@ -273,14 +273,29 @@ class Lexer:
 
     def handle_comments(self):
         # handle /* */ comments
+        comment = ""
+        pos_start = self.pos.copy()
+        
+
         if self.current_char == '/' and self.current_char_copy == '*':
-            while self.current_char != None and self.current_char == '*' and self.current_char_copy == '/':
+            self.advance()
+            while self.current_char != None and not (self.current_char == '*' and self.current_char_copy == '/'):
+                comment += self.current_char
                 self.advance()
-                self.peek()
+                if(self.current_char == "*"):
+                    self.peek()
+            self.advance()
+
         # handle // comments
-        else:
+        elif self.current_char == '/' and self.current_char_copy == "/":
+            self.advance()
             while self.current_char != None and self.current_char != '\n':
+                comment += self.current_char
                 self.advance()
+            print("2: comment", comment)
+
+
+        return Token(TT_COMMENT, comment, pos_start, self.pos)
 
 #######################################
 # RUN
@@ -302,7 +317,14 @@ def run(fn, text):
     result = translator.translate()
     keywords = Translate_Keywords(result)
     final = keywords.translate_keywords()
-    write = write_tranlsated_tokens(final)
-    working = write.write_to_file()
+    
+    write_file = write_tranlsated_tokens(final)
+    write_file.write_to_file()
+    
+    write_frontend = write_tranlsated_tokens(final)
+    working = write_frontend.write_to_frontend()
 
-    return final, None
+    
+
+
+    return working, None

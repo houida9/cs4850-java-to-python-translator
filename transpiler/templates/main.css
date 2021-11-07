@@ -1,5 +1,5 @@
 body {
-    background-color: #aaabb890;
+    background-color: #aaabb85e;
 }
 
 input {
@@ -14,7 +14,7 @@ textarea {
     padding: 20px;
     border-radius: 7px; 
     box-shadow: 6px 6px 6px 6px #888888; 
-    border:solid 1px black;
+    border:solid 1px rgba(0, 0, 0, 0.418);
 }
 
 .row>div>img, .row>div>i {

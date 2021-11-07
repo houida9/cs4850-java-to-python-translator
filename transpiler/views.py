@@ -5,9 +5,16 @@ def home(request):
   if request.method == 'POST':
     submitted= request.POST.get("translate")
     java_code = request.POST.get('javaTextArea', "")
-    python_code, error = run("filename", java_code)
-    python_code = ''.join(str(e) for e in python_code)
     
+    python_code, error = run("filename", java_code)
+    print("backend scanner run")
+    print(python_code)
+    if error:
+      return render(request, 'main.html', {'python_code': "ERROR", 'java_code': str(java_code), 'submitted': submitted})
+    
+    python_code = ''.join(str(e) if e != 'EOF' and e != '\r' else '' for e in python_code)
+    
+    print("Front end translation")
     print(python_code)
     if error:
       python_code = error.as_string()
