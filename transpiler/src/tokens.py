@@ -1,5 +1,5 @@
-from .scanner import *
-from .translator import *
+from transpiler.src.scanner import *
+from transpiler.src.translator import *
 
 TT_INT			= 'INT'
 TT_STRING       = 'STRING'

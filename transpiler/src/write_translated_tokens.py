@@ -1,6 +1,7 @@
-from .scanner import *
-from .translator import *
-from .tokens import *
+from transpiler.src.scanner import *
+from transpiler.src.translator import *
+from transpiler.src.tokens import *
+from pathlib import Path
 
 #######################################
 # Write to Python file
@@ -13,7 +14,8 @@ class write_tranlsated_tokens:
         self.line_count = 1
         self.advance()
         self.result = []
-        self.file = open("transpiler/python_output/output.py", "w+")
+        location = Path("../../transpiler/python_output/output.py")
+        self.file = open(location, "w+")
 
     def advance(self):
         self.tok_idx += 1

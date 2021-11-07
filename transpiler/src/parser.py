@@ -1,4 +1,4 @@
-from .scanner import *
+from transpiler.src.scanner import *
 
 basicTypes = [
     "int", 

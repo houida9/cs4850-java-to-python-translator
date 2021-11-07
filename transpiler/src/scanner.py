@@ -1,7 +1,6 @@
-from .translator import *
-from .tokens import *
-from .write_translated_tokens import *
-
+from transpiler.src.translator import *
+from transpiler.src.tokens import *
+from transpiler.src.write_translated_tokens import *
 
 #######################################
 # CONSTANTS
@@ -17,29 +16,33 @@ WEIRD_LETTERS = LETTERS + DIGITS + '.' + '_' + ' ' + '"' + ":" + ";" + ',' + '!'
 #######################################
 # ERRORS
 #######################################
-class Error:
-    def __init__(self, pos_start, pos_end, error_name, details):
+class Error(Exception):
+    def __init__(self, errno, pos_start, pos_end, error_name, details):
+        self.args = (errno, details)
+        self.errno = errno
         self.pos_start = pos_start
         self.pos_end = pos_end
         self.error_name = error_name
         self.details = details
-    
-    def as_string(self):
-        result  = f'{self.error_name}: {self.details}\n'
+
+    def __str__(self):
+        result = f'{self.error_name}: {self.details}\n'
         result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}'
         return result
 
+
 class IllegalCharError(Error):
-    def __init__(self, pos_start, pos_end, details):
-        super().__init__(pos_start, pos_end, 'Illegal Character', details)
+    def __init__(self, errno, pos_start, pos_end, details):
+        super().__init__(errno, pos_start, pos_end, 'Illegal Character', details)
 
 class ExpectedCharError(Error):
-    def __init__(self, pos_start, pos_end, details):
-        super().__init__(pos_start, pos_end, 'Expected Character', details)
+    def __init__(self, errno, pos_start, pos_end, details):
+        super().__init__(errno, pos_start, pos_end, 'Expected Character', details)
 
 class InvalidSyntaxError(Error):
-    def __init__(self, pos_start, pos_end, details):
-        super().__init__(pos_start, pos_end, "Invalid Syntax", details)
+    def __init__(self, errno, pos_start, pos_end, details):
+        super().__init__(errno, pos_start, pos_end, "Invalid Syntax", details)
+
 
 #######################################
 # POSITION###########
@@ -53,15 +56,17 @@ class Position:
         self.ftxt = ftxt
 
     def advance(self, current_char=None):
-        self.idx +=1
+        self.idx += 1
         self.col += 1
-        if current_char =='\n':
+        if current_char == '\n':
             self.ln += 1
             self.col = 0
         return self
 
     def copy(self):
-        return  Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
+        return Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
+
+
 #######################################
 # LEXER
 #######################################
@@ -83,7 +88,7 @@ class Lexer:
         self.current_char_copy = self.current_char
         self.pos.advance(self.current_char_copy)
         self.current_char_copy = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
-        
+
     def make_tokens(self):
         tokens = []
 
@@ -114,7 +119,8 @@ class Lexer:
                     tokens.append(Token(TT_PLUSPLUS, pos_start=self.pos))
                 elif self.current_char_copy == '=':
                     tokens.append(Token(TT_PLUSEQ, pos_start=self.pos))
-                else: tokens.append(Token(TT_PLUS, pos_start=self.pos))
+                else:
+                    tokens.append(Token(TT_PLUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '-':
                 self.peek()
@@ -122,7 +128,8 @@ class Lexer:
                     tokens.append(Token(TT_MINUSMINUS, pos_start=self.pos))
                 elif self.current_char_copy == '=':
                     tokens.append(Token(TT_MINUSEQ, pos_start=self.pos))
-                else: tokens.append(Token(TT_MINUS, pos_start=self.pos))
+                else:
+                    tokens.append(Token(TT_MINUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '*':
                 self.peek()
@@ -151,7 +158,6 @@ class Lexer:
                 self.advance()
             elif self.current_char == '!':
                 token, error = self.make_not_equals()
-                if error: return [], error
                 tokens.append(token)
             elif self.current_char == '=':
                 tokens.append(self.make_equals())
@@ -177,10 +183,10 @@ class Lexer:
                 pos_start = self.pos.copy()
                 char = self.current_char
                 self.advance()
-                return [], IllegalCharError(pos_start, self.pos, "'" + char + "'")
+                raise IllegalCharError(1, pos_start, self.pos, "'" + char + "'")
 
         tokens.append(Token(TT_EOF, pos_start=self.pos))
-        return tokens, None
+        return tokens
 
     def make_number(self):
         num_str = ''
@@ -219,7 +225,7 @@ class Lexer:
             return Token(TT_NE, pos_start=pos_start, pos_end=self.pos), None
 
         self.advance()
-        return None, ExpectedCharError(pos_start, self.pos, "'=' (after '!')")
+        raise ExpectedCharError(2, pos_start, self.pos, "'=' (after '!')")
 
     def make_equals(self):
         tok_type = TT_EQ
@@ -269,20 +275,18 @@ class Lexer:
 
         tok_type = TT_STRING
         return Token(tok_type, id_str, pos_start, self.pos)
-    
 
     def handle_comments(self):
         # handle /* */ comments
         comment = ""
         pos_start = self.pos.copy()
-        
 
         if self.current_char == '/' and self.current_char_copy == '*':
             self.advance()
             while self.current_char != None and not (self.current_char == '*' and self.current_char_copy == '/'):
                 comment += self.current_char
                 self.advance()
-                if(self.current_char == "*"):
+                if (self.current_char == "*"):
                     self.peek()
             self.advance()
 
@@ -294,37 +298,32 @@ class Lexer:
                 self.advance()
             print("2: comment", comment)
 
-
         return Token(TT_COMMENT, comment, pos_start, self.pos)
+
 
 #######################################
 # RUN
 #######################################
 
 def run(fn, text):
-    #Generate tokens
+    # Generate tokens
     lexer = Lexer(fn, text)
-    tokens, error = lexer.make_tokens()
-    if error: 
-        return None, error
+    tokens = lexer.make_tokens()
 
-    #Generate AST
+    # Generate AST
     # parser = Parser(tokens)
     # ast = parser.parse()
 
-    #Translate
+    # Translate
     translator = Translator(tokens)
     result = translator.translate()
     keywords = Translate_Keywords(result)
     final = keywords.translate_keywords()
-    
+
     write_file = write_tranlsated_tokens(final)
     write_file.write_to_file()
-    
+
     write_frontend = write_tranlsated_tokens(final)
     working = write_frontend.write_to_frontend()
 
-    
-
-
-    return working, None
+    return working

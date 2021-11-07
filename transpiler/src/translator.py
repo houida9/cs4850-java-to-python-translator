@@ -1,5 +1,5 @@
-from .scanner import *
-from .tokens import *
+from transpiler.src.scanner import *
+from transpiler.src.tokens import *
 
 
 #######################################
