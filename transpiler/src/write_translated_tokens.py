@@ -3,10 +3,11 @@ from transpiler.src.translator import *
 from transpiler.src.tokens import *
 from pathlib import Path
 
+
 #######################################
 # Write to Python file
 #######################################
-class write_tranlsated_tokens:
+class WriteTranslatedTokens:
     def __init__(self, tokens):
         self.tokens = tokens
         self.tok_idx = -1
@@ -14,7 +15,9 @@ class write_tranlsated_tokens:
         self.line_count = 1
         self.advance()
         self.result = []
-        location = Path("../../transpiler/python_output/output.py")
+        location = Path("../python_output/output.py").resolve()
+        location.parent.mkdir(parents=True, exist_ok=True)  # required to create parentdir if it does
+        # not exist
         self.file = open(location, "w+")
 
     def advance(self):
@@ -29,8 +32,8 @@ class write_tranlsated_tokens:
         self.current_tok_copy = self.current_tok
         if self.tok_idx_copy < len(self.tokens):
             self.current_tok_copy = self.tokens[self.tok_idx_copy]
-        return  self.current_tok_copy
-    
+        return self.current_tok_copy
+
     def write_to_frontend(self):
         close_bracket_count = 0
         while self.current_tok != 'EOF':
@@ -56,9 +59,8 @@ class write_tranlsated_tokens:
                 self.result.append(str(self.write_space_count()))
                 self.scan_line()
         return self.result
-        
 
-    def write_to_file(self):        
+    def write_to_file(self):
         print("\nWriting to an output.py file...\n")
         self.write_to_frontend()
         for line in self.result:
@@ -111,7 +113,8 @@ class write_tranlsated_tokens:
         elif self.space_count == 20:
             self.result.append('\t\t\t\t\t')
             return ''
-        else: return ''
+        else:
+            return ''
 
     def scan_line(self):
         while self.current_tok != 'OPENBRACKET' and self.current_tok != 'NEWLINE':
@@ -120,5 +123,5 @@ class write_tranlsated_tokens:
             elif self.current_tok != 'OPENBRACKET' and self.current_tok != 'NEWLINE':
                 self.result.append(str(self.current_tok) + ' ')
                 self.advance()
-            else: break
-
+            else:
+                break

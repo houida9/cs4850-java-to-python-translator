@@ -35,9 +35,11 @@ class IllegalCharError(Error):
     def __init__(self, errno, pos_start, pos_end, details):
         super().__init__(errno, pos_start, pos_end, 'Illegal Character', details)
 
+
 class ExpectedCharError(Error):
     def __init__(self, errno, pos_start, pos_end, details):
         super().__init__(errno, pos_start, pos_end, 'Expected Character', details)
+
 
 class InvalidSyntaxError(Error):
     def __init__(self, errno, pos_start, pos_end, details):
@@ -320,10 +322,10 @@ def run(fn, text):
     keywords = Translate_Keywords(result)
     final = keywords.translate_keywords()
 
-    write_file = write_tranlsated_tokens(final)
+    write_file = WriteTranslatedTokens(final)
     write_file.write_to_file()
 
-    write_frontend = write_tranlsated_tokens(final)
+    write_frontend = WriteTranslatedTokens(final)
     working = write_frontend.write_to_frontend()
 
     return working
