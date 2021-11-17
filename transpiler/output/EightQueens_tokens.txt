@@ -1,0 +1,2 @@
+Illegal Character: '''
+File C:\Users\Khalib\Desktop\JavaToPython\cs4850-java-to-python-translator\transpiler\test_programs\EightQueens.java, line 35

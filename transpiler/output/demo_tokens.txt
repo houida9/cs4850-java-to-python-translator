@@ -1,0 +1,37 @@
+[KEYWORD:public
+, KEYWORD:class
+, IDENTIFIER:HelloWorld
+, (OPENBRACKET
+, [KEYWORD:public
+, KEYWORD:static
+, KEYWORD:void
+, KEYWORD:main
+, (LPAREN
+, [KEYWORD:String
+, (LARRAY
+, [], RARRAY
+), KEYWORD:args
+], RPAREN
+), (OPENBRACKET
+, [[(int, IDENTIFIER:i
+, EQ, INT
+)], KEYWORD:while
+, (LPAREN
+, [[IDENTIFIER:i
+, LT
+, INT:3
+]], RPAREN
+), (OPENBRACKET
+, [KEYWORD:System.out.print
+, (LPAREN
+, [IDENTIFIER:i
+], RPAREN
+), NEWLINE
+, [IDENTIFIER:i
+, +=
+, INT:1
+], NEWLINE
+], CLOSEBRACKET
+)], CLOSEBRACKET
+)], CLOSEBRACKET
+)]
