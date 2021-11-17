@@ -1,42 +1,46 @@
 from transpiler.src.scanner import *
 from transpiler.src.translator import *
 
-TT_INT = 'INT'
-TT_STRING = 'STRING'
-TT_FLOAT = 'FLOAT'
-TT_IDENTIFIER = 'IDENTIFIER'
-TT_KEYWORD = 'KEYWORD'
-TT_PLUS = 'PLUS'
-TT_MINUS = 'MINUS'
-TT_MUL = 'MUL'
-TT_DIV = 'DIV'
-TT_POW = 'POW'
-TT_EQ = 'EQ'
-TT_LPAREN = 'LPAREN'
-TT_RPAREN = 'RPAREN'
-TT_EE = 'EE'
-TT_NE = 'NE'
-TT_LT = 'LT'
-TT_GT = 'GT'
-TT_LTE = 'LTE'
-TT_GTE = 'GTE'
-TT_EOF = 'EOF'
-TT_NEWLINE = 'NEWLINE'
-TT_OPENBRACKET = 'OPENBRACKET'
+
+TT_INT			= 'INT'
+TT_STRING       = 'STRING'
+TT_FLOAT    	= 'FLOAT'
+TT_IDENTIFIER	= 'IDENTIFIER'
+TT_KEYWORD		= 'KEYWORD'
+TT_PLUS     	= 'PLUS'
+TT_MINUS    	= 'MINUS'
+TT_MUL      	= 'MUL'
+TT_DIV      	= 'DIV'
+TT_POW			= 'POW'
+TT_EQ			= 'EQ'
+TT_LPAREN   	= 'LPAREN'
+TT_RPAREN   	= 'RPAREN'
+TT_EE			= 'EE'
+TT_NE		    = 'NE'
+TT_LT		    = 'LT'
+TT_GT			= 'GT'
+TT_LTE			= 'LTE'
+TT_GTE			= 'GTE'
+TT_EOF			= 'EOF'
+TT_NEWLINE      = 'NEWLINE'
+TT_OPENBRACKET  = 'OPENBRACKET'
 TT_CLOSEBRACKET = 'CLOSEBRACKET'
-TT_QUOTE = 'QUOTE'
-TT_LARRAY = 'LARRAY'
-TT_RARRAY = 'RARRAY'
-TT_COMMA = 'COMMA'
-TT_COMMENT = 'COMMENT'
-TT_PLUSPLUS = '++'
-TT_MINUSMINUS = '--'
-TT_PRINT = 'PRINT'
-TT_TAB = 'TAB'
-TT_PLUSEQ = '+='
-TT_MINUSEQ = '-='
-TT_MULEQ = '*='
-TT_DIVEQ = '/='
+TT_QUOTE        = 'QUOTE'
+TT_LARRAY       = 'LARRAY'
+TT_RARRAY       = 'RARRAY'
+TT_COMMA        = 'COMMA'
+TT_PLUSPLUS     = '++'
+TT_MINUSMINUS     = '--'
+TT_PRINT        = 'PRINT'
+TT_TAB          = 'TAB'
+TT_PLUSEQ       = '+='
+TT_MINUSEQ       = '-='
+TT_MULEQ        = '*='
+TT_DIVEQ        = '/='
+TT_COMMENT      = 'COMMENT'
+TT_METHOD       = 'METHOD'
+TT_QUOTE        = 'QUOTE'
+TT_METHOD       = 'METHOD'
 
 KEYWORDS = [
     'double',
@@ -97,7 +101,6 @@ KEYWORDS = [
     'while'
 ]
 
-
 class Token:
     def __init__(self, type_, value=None, pos_start=None, pos_end=None):
         self.type = type_
@@ -115,5 +118,5 @@ class Token:
         return self.type == type_ and self.value == value
 
     def __repr__(self):
-        if self.value: return f'{self.type}:{self.value}'
-        return f'{self.type}'
+        if self.value: return f'{self.type}:{self.value}\n'
+        return f'{self.type}\n'

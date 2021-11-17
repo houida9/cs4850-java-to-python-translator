@@ -159,7 +159,7 @@ class Lexer:
                 tokens.append(Token(TT_RPAREN, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '!':
-                token, error = self.make_not_equals()
+                token = self.make_not_equals()
                 tokens.append(token)
             elif self.current_char == '=':
                 tokens.append(self.make_equals())
@@ -209,14 +209,37 @@ class Lexer:
 
     def make_identifier(self):
         id_str = ''
+        id_str_copy = ''
+        method_indicator = False
         pos_start = self.pos.copy()
 
         while self.current_char != None and self.current_char in LETTERS_DIGITS + '.' + '_':
             id_str += self.current_char
             self.advance()
 
-        tok_type = TT_KEYWORD if id_str in KEYWORDS else TT_IDENTIFIER
-        return Token(tok_type, id_str, pos_start, self.pos)
+        if id_str == 'java.util.Scanner':
+            tok_type = TT_IDENTIFIER
+            return Token(tok_type, id_str, pos_start, self.pos)
+        if id_str in KEYWORDS:
+            tok_type = TT_KEYWORD
+            return Token(tok_type, id_str, pos_start, self.pos)
+
+        else: #Check for Method call
+            for element in range(0, len(id_str)):
+                if id_str[element] == '.':
+                    self.tokens.append(Token(TT_IDENTIFIER, id_str_copy, pos_start, self.pos))
+                    id_str_copy = ''
+                    id_str_copy += '.'
+                    method_indicator = True
+                else:
+                    id_str_copy += id_str[element]
+
+        if method_indicator == False:
+            tok_type = TT_KEYWORD if id_str_copy in KEYWORDS else TT_IDENTIFIER
+            return Token(tok_type, id_str_copy, pos_start, self.pos)
+        else:
+            tok_type = TT_KEYWORD if id_str_copy in KEYWORDS else TT_METHOD
+            return Token(tok_type, id_str_copy, pos_start, self.pos)
 
     def make_not_equals(self):
         pos_start = self.pos.copy()
@@ -224,7 +247,7 @@ class Lexer:
 
         if self.current_char == '=':
             self.advance()
-            return Token(TT_NE, pos_start=pos_start, pos_end=self.pos), None
+            return Token(TT_NE, pos_start=pos_start, pos_end=self.pos)
 
         self.advance()
         raise ExpectedCharError(2, pos_start, self.pos, "'=' (after '!')")
@@ -298,7 +321,6 @@ class Lexer:
             while self.current_char != None and self.current_char != '\n':
                 comment += self.current_char
                 self.advance()
-            print("2: comment", comment)
 
         return Token(TT_COMMENT, comment, pos_start, self.pos)
 

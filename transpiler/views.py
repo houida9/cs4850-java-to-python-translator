@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .src.scanner import run
-from .src.scanner import Error
+from transpiler.src.scanner import run
+from transpiler.src.scanner import Error
 
 
 def home(request):
@@ -10,7 +10,6 @@ def home(request):
             java_code = request.POST.get('javaTextArea', "")
 
             python_code = run("filename", java_code)
-            print("backend scanner run")
             print(python_code)
         except Error as error:
             return render(request, 'main.html',
