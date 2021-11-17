@@ -81,6 +81,7 @@ class Lexer:
         self.current_char = None
         self.advance()
         self.current_char_copy = None
+        self.tokens = []
 
     def advance(self):
         self.pos.advance(self.current_char)
@@ -92,94 +93,93 @@ class Lexer:
         self.current_char_copy = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
 
     def make_tokens(self):
-        tokens = []
 
         while self.current_char != None:
             if self.current_char in ' \t':
                 self.advance()
             elif self.current_char == ';':
-                tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
+                self.tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
                 self.advance()
                 if self.current_char == '\n':
                     self.advance()
             elif self.current_char == '\n':
-                tokens.append(Token(TT_NEWLINE))
+                self.tokens.append(Token(TT_NEWLINE))
                 self.advance()
             elif self.current_char == '"':
-                tokens.append(self.make_print_statement())
+                self.tokens.append(self.make_print_statement())
                 self.advance()
             elif self.current_char == ',':
-                tokens.append(Token(TT_COMMA, pos_start=self.pos))
+                self.tokens.append(Token(TT_COMMA, pos_start=self.pos))
                 self.advance()
             elif self.current_char in DIGITS:
-                tokens.append(self.make_number())
+                self.tokens.append(self.make_number())
             elif self.current_char in LETTERS:
-                tokens.append(self.make_identifier())
+                self.tokens.append(self.make_identifier())
             elif self.current_char == '+':
                 self.peek()
                 if self.current_char_copy == '+':
-                    tokens.append(Token(TT_PLUSPLUS, pos_start=self.pos))
+                    self.tokens.append(Token(TT_PLUSPLUS, pos_start=self.pos))
                 elif self.current_char_copy == '=':
-                    tokens.append(Token(TT_PLUSEQ, pos_start=self.pos))
+                    self.tokens.append(Token(TT_PLUSEQ, pos_start=self.pos))
                 else:
-                    tokens.append(Token(TT_PLUS, pos_start=self.pos))
+                    self.tokens.append(Token(TT_PLUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '-':
                 self.peek()
                 if self.current_char_copy == '-':
-                    tokens.append(Token(TT_MINUSMINUS, pos_start=self.pos))
+                    self.tokens.append(Token(TT_MINUSMINUS, pos_start=self.pos))
                 elif self.current_char_copy == '=':
-                    tokens.append(Token(TT_MINUSEQ, pos_start=self.pos))
+                    self.tokens.append(Token(TT_MINUSEQ, pos_start=self.pos))
                 else:
-                    tokens.append(Token(TT_MINUS, pos_start=self.pos))
+                    self.tokens.append(Token(TT_MINUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '*':
                 self.peek()
                 if self.current_char_copy == '=':
-                    tokens.append(Token(TT_MULEQ, pos_start=self.pos))
+                    self.tokens.append(Token(TT_MULEQ, pos_start=self.pos))
                 else:
-                    tokens.append(Token(TT_MUL, pos_start=self.pos))
+                    self.tokens.append(Token(TT_MUL, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '/':
                 self.peek()
                 if self.current_char_copy in ('/*'):
-                    tokens.append(self.handle_comments())
+                    self.tokens.append(self.handle_comments())
                 elif self.current_char_copy == '=':
-                    tokens.append(Token(TT_DIVEQ, pos_start=self.pos))
+                    self.tokens.append(Token(TT_DIVEQ, pos_start=self.pos))
                 else:
-                    tokens.append(Token(TT_DIV, pos_start=self.pos))
+                    self.tokens.append(Token(TT_DIV, pos_start=self.pos))
                     self.advance()
             elif self.current_char == '^':
-                tokens.append(Token(TT_POW, pos_start=self.pos))
+                self.tokens.append(Token(TT_POW, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '(':
-                tokens.append(Token(TT_LPAREN, pos_start=self.pos))
+                self.tokens.append(Token(TT_LPAREN, pos_start=self.pos))
                 self.advance()
             elif self.current_char == ')':
-                tokens.append(Token(TT_RPAREN, pos_start=self.pos))
+                self.tokens.append(Token(TT_RPAREN, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '!':
                 token = self.make_not_equals()
-                tokens.append(token)
+                self.tokens.append(token)
             elif self.current_char == '=':
-                tokens.append(self.make_equals())
+                self.tokens.append(self.make_equals())
             elif self.current_char == '<':
-                tokens.append(self.make_less_than())
+                self.tokens.append(self.make_less_than())
             elif self.current_char == '>':
-                tokens.append(self.make_greater_than())
+                self.tokens.append(self.make_greater_than())
             elif self.current_char == '{':
-                tokens.append(Token(TT_OPENBRACKET, pos_start=self.pos))
+                self.tokens.append(Token(TT_OPENBRACKET, pos_start=self.pos))
                 self.advance()
                 if self.current_char == '\n':
                     self.advance()
             elif self.current_char == '}':
-                tokens.append(Token(TT_CLOSEBRACKET, pos_start=self.pos))
+                self.tokens.append(Token(TT_CLOSEBRACKET, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '[':
-                tokens.append(Token(TT_LARRAY, pos_start=self.pos))
+                self.tokens.append(Token(TT_LARRAY, pos_start=self.pos))
                 self.advance()
             elif self.current_char == ']':
-                tokens.append(Token(TT_RARRAY, pos_start=self.pos))
+                self.tokens.append(Token(TT_RARRAY, pos_start=self.pos))
                 self.advance()
             else:
                 pos_start = self.pos.copy()
@@ -187,8 +187,8 @@ class Lexer:
                 self.advance()
                 raise IllegalCharError(1, pos_start, self.pos, "'" + char + "'")
 
-        tokens.append(Token(TT_EOF, pos_start=self.pos))
-        return tokens
+        self.tokens.append(Token(TT_EOF, pos_start=self.pos))
+        return self.tokens
 
     def make_number(self):
         num_str = ''
