@@ -103,7 +103,6 @@ class Lexer:
                 if self.current_char == '\n':
                     self.advance()
             elif self.current_char == '\n':
-                self.tokens.append(Token(TT_NEWLINE))
                 self.advance()
             elif self.current_char == '"':
                 self.tokens.append(self.make_print_statement())
@@ -144,6 +143,7 @@ class Lexer:
                 self.peek()
                 if self.current_char_copy in ('/*'):
                     self.tokens.append(self.handle_comments())
+                    self.tokens.append(Token(TT_NEWLINE))
                 elif self.current_char_copy == '=':
                     self.tokens.append(Token(TT_DIVEQ, pos_start=self.pos))
                 else:
@@ -311,7 +311,7 @@ class Lexer:
             while self.current_char != None and not (self.current_char == '*' and self.current_char_copy == '/'):
                 comment += self.current_char
                 self.advance()
-                if (self.current_char == "*"):
+                if self.current_char == "*":
                     self.peek()
             self.advance()
 
