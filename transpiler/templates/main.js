@@ -19,7 +19,11 @@ setInterval(function() {
 }, 1000);
 
 // Click listener for the Python download button
-function downloadPythonFile(filename){
+function downloadPythonFile(){
+    var date = new Date();
+    
+    var filename = "translated" + date.getFullYear() + (date.getMonth() + 1) + date.getDate() +
+      date.getHours() + date.getMinutes() + date.getSeconds() + ".py";
     var element = document.createElement('a');
     let text = document.getElementById('pythonTextArea').value;
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -34,8 +38,11 @@ function downloadPythonFile(filename){
 }
 
 // Click listener for the Java download button
-function downloadJavaFile(filename){
-    var element = document.createElement('a');
+function downloadJavaFile(){
+    var date = new Date();
+
+    var filename = "original" + date.getFullYear() + date.getMonth() + date.getDay() +
+      date.getHours() + date.getMinutes() + date.getSeconds() + ".java";    var element = document.createElement('a');
     let text = document.getElementById('javaTextArea').value;
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
     element.setAttribute('download', filename);

@@ -168,7 +168,7 @@ class Translator:
                     self.translatedToken.append('-')
                     self.advance()
                 elif self.current_tok.type == TT_COMMENT:
-                    self.translatedToken.append('#' + self.current_tok.value)
+                    self.translatedToken.append('#' + self.current_tok.value + "\n")
                     self.advance()
                 elif self.current_tok.type == TT_EQ:
                     self.translatedToken.append('=')
@@ -313,6 +313,7 @@ class Translator:
         newlineCount = 0
         inputString = ''
         inputIndicator = False
+        typeCast = ''
         self.peek(incrementer)
 
         #check for scanner
@@ -320,6 +321,14 @@ class Translator:
             if self.current_tok_copy.type == TT_METHOD:
                 if self.current_tok_copy.value in SCANNER:
                     inputIndicator = True
+                    if self.current_tok_copy.value == '.nextFloat':
+                        typeCast = 'float'
+                    elif self.current_tok_copy.value == '.nextLine':
+                        typeCast = ''
+                    elif self.current_tok_copy.value == '.nextInt':
+                        typeCast = 'int'
+                    else:
+                        typeCast = ''
                     break
                 else:
                     incrementer += 1
@@ -361,13 +370,19 @@ class Translator:
                 else:
                     incrementer += 1
                     self.advance()
-            append = identifier + ' = input(' + inputString + ')'
-            self.translatedToken.append(append)
+            if typeCast != '':
+                append = identifier + ' = ' + typeCast +'(input(' + inputString + '))'
+                self.translatedToken.append(append)
+                self.translatedToken.append('NEWLINE')
+            else:
+                append = identifier + ' = input(' + inputString + ')'
+                self.translatedToken.append(append)
+                self.translatedToken.append('NEWLINE')
 
         else:
             self.translatedToken.append('NEWLINE')
             self.make_print()
-
+        
     def delete_Scanner(self):
         while self.current_tok.type != TT_NEWLINE:
             self.advance()

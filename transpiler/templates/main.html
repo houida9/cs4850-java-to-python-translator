@@ -40,7 +40,7 @@
               <div class="custom-file">
                 <input type="file" class="custom-file-input form-control" id="inputfile"/>
                 <button class="btn btn-success" type="button" id="javadownload"
-                onclick="downloadJavaFile('original.java')"  disabled>Download
+                onclick="downloadJavaFile()"  disabled>Download
 
                 </button>
                 <button class="btn btn-sm btn-danger" id="clearchanges"
@@ -65,7 +65,7 @@
             <!-- PYTHON -->
             <div class="col-lg-5">
                 <button class="btn btn-warning sm" type="button" id="pythondownload"
-                          onclick="downloadPythonFile('translated.py')" disabled>
+                          onclick="downloadPythonFile()" disabled>
                       Download
                 </button>
               <textarea readonly id="pythonTextArea" name="pythonTextArea" withspellcheck="false" rows="25" cols="80">
