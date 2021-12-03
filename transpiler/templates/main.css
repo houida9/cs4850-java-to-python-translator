@@ -8,7 +8,7 @@ input {
 }
 
 textarea {
-    max-width: 100%;
+    max-width: 135%;
     border-radius: 6px;
     margin-top: 30px;
     padding: 20px;
@@ -68,15 +68,15 @@ input[type="file"] {
 }
 
 #translate {
-    top: 40em !important; 
-    left:50% !important;
+    top: 27em !important;
+    left:55% !important;
     transform: translate(-50%, 50%) !important;
-    font-weight: 300px !important;
+    font-weight: 250px !important;
     letter-spacing: 2px;
 }
 
 #javaTextArea:focus, #pythonTextArea:focus {
     outline: none !important;
     border: none;
-    box-shadow: 0 0 10px #1763b4;
+    box-shadow: 0 0 5px #1763b4;
 }
