@@ -1,5 +1,6 @@
-from transpiler.src.scanner import *
+from transpiler.src.scanner import Lexer
 from transpiler.src.tokens import *
+from transpiler.src.write_translated_tokens import WriteTranslatedTokens
 
 #######################################
 # Translator & Deleted keywords
@@ -624,3 +625,19 @@ class Translate_Keywords:
                 self.advance()
             else:break
         self.translatedKeywords.append(self.current_tok)
+        
+def run(file_path, text, output_file_path):
+        # Generate tokens
+        lexer = Lexer(file_path, text)
+        tokens = lexer.make_tokens()
+
+        # Translate
+        translator = Translator(tokens)
+        result = translator.translate()
+        keywords = Translate_Keywords(result)
+        final = keywords.translate_keywords()
+
+        write_frontend = WriteTranslatedTokens(final, output_file_path)
+        working = write_frontend.write_to_file()
+
+        return working

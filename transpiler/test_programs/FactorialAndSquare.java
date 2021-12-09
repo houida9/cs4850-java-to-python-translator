@@ -1,6 +1,7 @@
 import java.util.Scanner;
 
-public class FactorialandSquare
+/* Most complicated */
+public class FactorialAndSquare
 {
     static int factorial(int n){
         int res = 1;

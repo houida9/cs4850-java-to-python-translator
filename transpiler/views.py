@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from transpiler.src.scanner import run
+from transpiler.src.translator import run
 from transpiler.src.scanner import Error
+from transpiler.src.main import run_java_files
 
 
 def home(request):
@@ -9,11 +10,26 @@ def home(request):
             submitted = request.POST.get("translate")
             java_code = request.POST.get('javaTextArea', "")
             
+            # run the demo files
+            # comment out the line below to translate all of the Java programs under transpiler/test_programs
+            # run_java_files()
+
             # run the interpreter
-            run("filename", java_code)
+            import time
+            timestr = time.strftime("%Y%m%d_%H%M%S")
+            output_dir = f"transpiler/output/translated_{timestr}"
+            output_file = f"transpiler/output/translated_{timestr}/front_end_output.py"
+            
+            from os.path import exists
+            from os import makedirs
+            if not exists(output_dir):
+                makedirs(output_dir)
+                
+            run("front_end_java_input", java_code, output_file)
+            
             
             python_code = ''
-            with open('transpiler/python_output/output.py') as file:
+            with open(output_file) as file:
                 for line in file:
                     python_code += line
                     

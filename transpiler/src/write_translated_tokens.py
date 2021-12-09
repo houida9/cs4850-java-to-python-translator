@@ -5,14 +5,14 @@ from pathlib import Path
 
 
 class WriteTranslatedTokens:
-    def __init__(self, tokens):
+    def __init__(self, tokens, file_path):
         self.tokens = tokens
         self.tok_idx = -1
         self.space_count = 0
         self.line_count = 1
         self.advance()
         self.spaceTracker = ''
-        self.f = open("transpiler/python_output/output.py", "w+")
+        self.f = open(file_path, "w+")
 
     def advance(self):
         self.tok_idx += 1
@@ -29,7 +29,6 @@ class WriteTranslatedTokens:
         return  self.current_tok_copy
 
     def write_to_file(self):
-        print("\nWriting to an output.py file...\n")
         close_bracket_count = 0
         while self.current_tok != 'EOF':
             if self.current_tok == 'OPENBRACKET':

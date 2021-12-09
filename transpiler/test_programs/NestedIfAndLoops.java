@@ -1,4 +1,4 @@
-public class JavaExample
+public class NestedIfAndLoops
 {
     public static void main(String args[])
     {

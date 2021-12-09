@@ -332,23 +332,3 @@ class Lexer:
 
         return Token(TT_COMMENT, comment, pos_start, self.pos)
 
-
-#######################################
-# RUN
-#######################################
-
-def run(fn, text):
-    # Generate tokens
-    lexer = Lexer(fn, text)
-    tokens = lexer.make_tokens()
-
-    # Translate
-    translator = Translator(tokens)
-    result = translator.translate()
-    keywords = Translate_Keywords(result)
-    final = keywords.translate_keywords()
-
-    write_frontend = WriteTranslatedTokens(final)
-    working = write_frontend.write_to_file()
-
-    return working, None

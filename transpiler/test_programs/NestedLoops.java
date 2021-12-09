@@ -1,4 +1,4 @@
-class Main {
+class NestedLoops {
   public static void main(String[] args) {
 
     int weeks = 3;

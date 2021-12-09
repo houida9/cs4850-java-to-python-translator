@@ -1,9 +1,10 @@
 import java.util.Scanner;
-public class JavaExample
+
+public class CalculateInterest
 {
     public static void main(String args[])
     {
-        float p, r, t, sintrest;
+        float p, r, t, sinterest;
         Scanner scan = new Scanner(System.in);
         System.out.print("Enter the Principal : ");
         p = scan.nextFloat();
