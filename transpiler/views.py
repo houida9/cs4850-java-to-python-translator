@@ -8,9 +8,15 @@ def home(request):
         try:
             submitted = request.POST.get("translate")
             java_code = request.POST.get('javaTextArea', "")
-
-            python_code = run("filename", java_code)
-            print(python_code)
+            
+            # run the interpreter
+            run("filename", java_code)
+            
+            python_code = ''
+            with open('transpiler/python_output/output.py') as file:
+                for line in file:
+                    python_code += line
+                    
         except Error as error:
             return render(request, 'main.html',
                           {'python_code': str(error), 'java_code': str(java_code), 'submitted': submitted})
@@ -21,8 +27,6 @@ def home(request):
         try:
             python_code = ''.join(str(e) if e != 'EOF' and e != '\r' else '' for e in python_code)
 
-            print("Front end translation")
-            print(python_code)
         except Exception as error:
             python_code = str(error)
         finally:

@@ -4,9 +4,6 @@ from transpiler.src.tokens import *
 from pathlib import Path
 
 
-#######################################
-# Write to Python file
-#######################################
 class WriteTranslatedTokens:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -14,11 +11,8 @@ class WriteTranslatedTokens:
         self.space_count = 0
         self.line_count = 1
         self.advance()
-        self.result = []
-        location = Path("../python_output/output.py").resolve()
-        location.parent.mkdir(parents=True, exist_ok=True)  # required to create parentdir if it does
-        # not exist
-        self.file = open(location, "w+")
+        self.spaceTracker = ''
+        self.f = open("transpiler/python_output/output.py", "w+")
 
     def advance(self):
         self.tok_idx += 1
@@ -32,18 +26,19 @@ class WriteTranslatedTokens:
         self.current_tok_copy = self.current_tok
         if self.tok_idx_copy < len(self.tokens):
             self.current_tok_copy = self.tokens[self.tok_idx_copy]
-        return self.current_tok_copy
+        return  self.current_tok_copy
 
-    def write_to_frontend(self):
+    def write_to_file(self):
+        print("\nWriting to an output.py file...\n")
         close_bracket_count = 0
         while self.current_tok != 'EOF':
             if self.current_tok == 'OPENBRACKET':
-                self.result.append(':\n')
+                self.f.write(':\n')
                 self.space_count += 4
                 self.line_count += 1
                 self.advance()
             elif self.current_tok == 'NEWLINE':
-                self.result.append('\n')
+                self.f.write('\n')
                 self.line_count += 1
                 self.advance()
             elif self.current_tok == 'CLOSEBRACKET':
@@ -56,72 +51,53 @@ class WriteTranslatedTokens:
             elif self.current_tok == 'EOF':
                 break
             else:
-                self.result.append(str(self.write_space_count()))
+                # if self.current_tok == 'class':
+                #     self.space_count = 0
+                self.f.write(str(self.write_space_count()))
                 self.scan_line()
-        return self.result
-
-    def write_to_file(self):
-        print("\nWriting to an output.py file...\n")
-        self.write_to_frontend()
-        for line in self.result:
-            print(line)
-            self.file.write(str(line))
-        # close_bracket_count = 0
-        # while self.current_tok != 'EOF':
-        #     if self.current_tok == 'OPENBRACKET':
-        #         self.file.write(':\n')
-        #         self.space_count += 4
-        #         self.line_count += 1
-        #         self.advance()
-        #     elif self.current_tok == 'NEWLINE':
-        #         self.file.write('\n')
-        #         self.line_count += 1
-        #         self.advance()
-        #     elif self.current_tok == 'CLOSEBRACKET':
-        #         close_bracket_count += 1
-        #         # if close_bracket_count == 1:
-        #         #     self.advance()
-        #         # else:
-        #         self.space_count -= 4
-        #         self.advance()
-        #     elif self.current_tok == 'EOF':
-        #         break
-        #     else:
-        #         self.file.write(str(self.write_space_count()))
-        #         for line in self.scan_line():
-        #             print(line)
-        #             self.file.write("houida")
-        #             self.file.write(line)
-        self.file.close()
+        self.f.close()
 
     def write_space_count(self):
-        if self.space_count == 0:
-            self.result.append('')
+        if self.space_count < 0:
+            self.space_count = 0
+            self.f.write('')
+            self.spaceTracker = ''
+            return ''
+        elif self.space_count == 0:
+            self.f.write('')
+            self.spaceTracker = ''
             return ''
         elif self.space_count == 4:
-            self.result.append('\t')
+            self.f.write('    ')
+            self.spaceTracker = '    '
             return ''
         elif self.space_count == 8:
-            self.result.append('\t\t')
+            self.f.write('        ')
+            self.spaceTracker = '        '
             return ''
         elif self.space_count == 12:
-            self.result.append('\t\t\t')
+            self.f.write('            ')
+            self.spaceTracker = '            '
             return ''
         elif self.space_count == 16:
-            self.result.append('\t\t\t\t')
+            self.f.write('                ')
+            self.spaceTracker = '                '
             return ''
         elif self.space_count == 20:
-            self.result.append('\t\t\t\t\t')
+            self.f.write('                    ')
+            self.spaceTracker = '                    '
             return ''
-        else:
-            return ''
+        else: return ''
 
     def scan_line(self):
         while self.current_tok != 'OPENBRACKET' and self.current_tok != 'NEWLINE':
             if self.current_tok == 'EOF':
                 break
-            elif self.current_tok != 'OPENBRACKET' and self.current_tok != 'NEWLINE':
-                self.result.append(str(self.current_tok) + ' ')
+            elif self.current_tok == '= None\n':
+                self.f.write(str(self.current_tok) + '\n')
+                self.f.write(self.spaceTracker)
                 self.advance()
-            else:
-                break
+            elif self.current_tok != 'OPENBRACKET' and self.current_tok != 'NEWLINE':
+                self.f.write(str(self.current_tok) + ' ')
+                self.advance()
+            else: break

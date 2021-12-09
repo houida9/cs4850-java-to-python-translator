@@ -18,7 +18,7 @@ java_programs = [file for file in listdir(input_dir)
 for input_file in java_programs:
     try:
         input_path = join(input_dir, input_file)
-        output_path = join(output_dir, f"{splitext(input_file)[0]}_tokens.txt")
+        output_path = join(output_dir, f"translated_{splitext(input_file)[0]}.txt")
 
         print(f"\nScanning {input_path}")
 

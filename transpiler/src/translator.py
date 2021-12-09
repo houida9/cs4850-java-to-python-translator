@@ -163,12 +163,28 @@ class Translator:
                             self.translatedToken.append(self.current_tok.value)
                             self.translatedToken.append('= None')
                             self.advance()
+                        elif self.current_tok_copy.type == TT_COMMA:
+                            while(self.current_tok.type != 'NEWLINE'):
+                                if self.current_tok.value in METHOD:
+                                    self.advance()
+                                elif self.current_tok.type == TT_IDENTIFIER:
+                                    self.peek(1)
+                                    if self.current_tok_copy.type == TT_COMMA:
+                                        self.translatedToken.append(self.current_tok.value)
+                                        self.translatedToken.append('= None\n')
+                                        self.advance()
+                                    elif self.current_tok_copy.type == 'NEWLINE':
+                                        self.translatedToken.append(self.current_tok.value)
+                                        self.translatedToken.append('= None\n')
+                                        self.advance()
+                                    else: self.advance()
+                                else: self.advance()
                         else: self.advance()
                 elif self.current_tok.type == TT_MINUS:
                     self.translatedToken.append('-')
                     self.advance()
                 elif self.current_tok.type == TT_COMMENT:
-                    self.translatedToken.append('#' + self.current_tok.value + "\n")
+                    self.translatedToken.append('#' + self.current_tok.value)
                     self.advance()
                 elif self.current_tok.type == TT_EQ:
                     self.translatedToken.append('=')
@@ -225,6 +241,12 @@ class Translator:
                         else:
                             self.translatedToken.append(self.current_tok.value)
                             self.advance()
+                    elif self.current_tok.value == 'true':
+                        self.translatedToken.append("True")
+                        self.advance()
+                    elif self.current_tok.value == 'false':
+                        self.translatedToken.append("False")
+                        self.advance()
                     else:
                         self.translatedToken.append(self.current_tok.value)
                         self.advance()
@@ -265,6 +287,9 @@ class Translator:
                     self.advance()
                 elif self.current_tok.type == TT_MUL:
                     self.translatedToken.append('*')
+                    self.advance()
+                elif self.current_tok.type == TT_NOTEQ:
+                    self.translatedToken.append('!=')
                     self.advance()
                 elif self.current_tok.type == TT_DIV:
                     self.translatedToken.append('/')
@@ -379,10 +404,11 @@ class Translator:
                 self.translatedToken.append(append)
                 self.translatedToken.append('NEWLINE')
 
+
         else:
             self.translatedToken.append('NEWLINE')
             self.make_print()
-        
+
     def delete_Scanner(self):
         while self.current_tok.type != TT_NEWLINE:
             self.advance()

@@ -94,13 +94,11 @@ class KeywordNode:
 
 
 class StringNode:
-    def __init__(self, lquote, tok, rquote):
-        self.lquote = lquote
+    def __init__(self, tok):
         self.tok = tok
-        self.rquote = rquote
 
     def __repr__(self):
-        return f'({self.lquote}, {self.tok}, {self.rquote})'
+        return f'{self.tok}'
 
 
 class ObjectNode:
@@ -112,6 +110,8 @@ class ObjectNode:
 
     def __repr__(self):
         return f'({self.className}, {self.lparen}, {self.param}, {self.rparen})'
+
+
 
 
 #######################################
@@ -147,7 +147,7 @@ class Parser:
         return res
 
     ####################
-    # MATH 
+    # MATH
     ####################
     def factor(self):
         res = ParseResult()
@@ -244,7 +244,6 @@ class Parser:
                     values = self.paren()
                     binaryOp.append(ObjectNode(className, values[0], values[1], values[2]))
                 else:
-                    print("NOT CAUGHT")
                     iden = self.current_tok
                     res.register(self.advance())
 
@@ -286,10 +285,12 @@ class Parser:
     def read_program(self):
         res = ParseResult()
         tok = self.current_tok
+        peek = self.peek(2)
+        print(tok, peek)
 
         if tok.type == TT_KEYWORD:
             # initialize variables
-            if tok.value in ('int', 'double', 'float', 'String', 'boolean'):
+            if tok.value in ('int', 'double', 'float', 'boolean'):
                 basicType = tok.value
                 res.register(self.advance())
                 values = self.initilize(basicType)
@@ -305,7 +306,7 @@ class Parser:
                 values = self.initilize('int')
                 res.register(self.advance())
                 return res.success(values)
-            if peek.type == TT_PLUS:
+            if peek.type in (TT_PLUS, TT_MINUS, TT_LT, TT_GT, TT_PLUSEQ):
                 op = []
                 id1 = IdentifierNode(tok)
                 op.append(id1)
@@ -325,7 +326,6 @@ class Parser:
             body = []
             res.register(self.advance())
             while self.current_tok.type != TT_CLOSEBRACKET:
-                print(self.current_tok)
                 body.append(res.register(self.read_program()))
 
                 if self.current_tok.type == TT_EOF:
@@ -368,21 +368,10 @@ class Parser:
             res.register(self.advance())
             return res.success(BracketNode(opn, body, close))
 
-        elif tok.value == '"':
-            lquote = tok
-            res.register(self.advance())
-            words = []
-            while self.current_tok.value != '"':
-                words.append(self.current_tok)
-                res.register(self.advance())
+        elif tok.type == TT_STRING:
+            res.register((self.advance()))
+            return res.success((StringNode(tok)))
 
-                if self.current_tok.type == TT_EOF:
-                    return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end,
-                                                          'Expected "'))
-
-            rquote = self.current_tok
-            res.register(self.advance())
-            return res.success(StringNode(lquote, words, rquote))
 
         elif tok.type == TT_NEWLINE:
             res.register(self.advance())
@@ -390,7 +379,7 @@ class Parser:
 
         # Implement some type of error handling here
         else:
-            print(self.current_tok, tok)
+            print("No idea what to do here", tok.type)
             return None
             # return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end,
             # 'Expected something here but got {}'.format(tok)))
@@ -430,27 +419,24 @@ class ParseResult:
         self.error = error
         return self
 
-
 def run(fn, text):
     lexer = Lexer(fn, text)
-    tokens, error = lexer.make_tokens()
+    tokens = lexer.make_tokens()
 
-    if error: return None, error
-
-    # Generate AST
+    #Generate AST
     parser = Parser(tokens)
     values = []
     while parser.current_tok != None and parser.current_tok.type != TT_EOF:
         res = parser.read_program()
-        if res.error:
+        if res.error : 
             print(res.error.as_string())
             values = []
             break
         values.append(res)
 
-    # get nodes
+    #get nodes
     nodes = []
-    for value in values:
+    for value in values: 
         nodes.append(value.node)
 
-    return nodes, None
+    return nodes

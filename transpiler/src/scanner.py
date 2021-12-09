@@ -104,6 +104,13 @@ class Lexer:
                     self.advance()
             elif self.current_char == '\n':
                 self.advance()
+            elif self.current_char == '!':
+                self.peek()
+                if self.current_char_copy == '=':
+                    self.tokens.append(Token(TT_NOTEQ, pos_start=self.pos))
+                    self.advance()
+                    self.advance()
+                else: self.advance()
             elif self.current_char == '"':
                 self.tokens.append(self.make_print_statement())
                 self.advance()
@@ -302,6 +309,7 @@ class Lexer:
         return Token(tok_type, id_str, pos_start, self.pos)
 
     def handle_comments(self):
+        
         # handle /* */ comments
         comment = ""
         pos_start = self.pos.copy()
@@ -334,20 +342,13 @@ def run(fn, text):
     lexer = Lexer(fn, text)
     tokens = lexer.make_tokens()
 
-    # Generate AST
-    # parser = Parser(tokens)
-    # ast = parser.parse()
-
     # Translate
     translator = Translator(tokens)
     result = translator.translate()
     keywords = Translate_Keywords(result)
     final = keywords.translate_keywords()
 
-    write_file = WriteTranslatedTokens(final)
-    write_file.write_to_file()
-
     write_frontend = WriteTranslatedTokens(final)
-    working = write_frontend.write_to_frontend()
+    working = write_frontend.write_to_file()
 
-    return working
+    return working, None
